@@ -45,7 +45,7 @@
 			transform: translateX(-50%);
 			width: 95%;
 			max-width: 1100px;
-			background: rgba(0, 0, 0, 0.7);
+			background: rgba(0, 0, 0, 0.4);
 			padding: 25px;
 			border-radius: 8px;
 			color: white;
@@ -98,7 +98,7 @@
 			display: flex;
 			flex-direction: column;
 			gap: 1px;
-			transform: scale(0.7); /* Scales down the entire container to 60% */
+			transform: scale(0.8); /* Scales down the entire container to 60% */
 			transform-origin: top right; /* Keeps the top-right corner fixed while scaling */
 		}
 
@@ -166,10 +166,7 @@
         
         vec4 sph(in vec2 fragCoord) {
 			float off = sin(iTime) * 0.5 + 0.5;
-    
 			vec3 ccol = clamp(pal(off, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.33,0.67) ),0.,1.);
-
-
             vec4 color = vec4(0.3, 0.3, 0.3, 0.1) * 0.;
             vec2 uv = fragCoord / iResolution.xy;
             float near = 0.2;
@@ -185,7 +182,7 @@
                 vec3 light = normalize(vec3(4.0 * sin(iTime * 0.3), 1.0, 4.0 * cos(iTime * 0.3)));
                 vec3 normal = normalize(intersect - sphereCenter);
                 float diffuse = dot(light, normal);
-                color = vec4(ccol * 0.1,0.0);
+                color = vec4(ccol * 0.2,0.0);
 				color += max(clamp(diffuse,0.,1.) * vec4(ccol * 255., 255.0) / vec4(255.0), 0.);
             }
             return color;
@@ -193,7 +190,6 @@
 		
 		
         const float VarFlt = 0.5;
-		
         vec4 colorize(in vec4 color) {
             vec3 nCol = normalize(color.rgb);
             float nLen = length(color.rgb);
@@ -205,7 +201,6 @@
             float ratio = iResolution.y / 720.0;
 			float PIXEL_SIZE = 1. + floor(abs(sin(iTime*VarFlt) * sin(iTime * VarFlt) ) * 16.);
              vec2 pixel = floor(fragCoord / (PIXEL_SIZE * ratio) + 0.5) * PIXEL_SIZE * ratio;
-
             vec2 uv = pixel / iResolution.xy;
             float amount = 0.0;
             vec4 col;
@@ -227,8 +222,11 @@
     </div>
     <div class="projects">
 		<h1><u>Introduction</u></h1>
-		<p style="font-size: 1.6rem;"> Hello! I’m Samuel, an Electronics Engineering fresher at RVCE, Bangalore. My passion for programming and game development began in 6th grade and I’ve been honing my skills ever since.
-I’m also actively developing my understanding of electronics (and hardware in general) as well as my expertise in competitive programming.</p>
+		<p style="font-size: 1.6rem;"> Hello! I’m Samuel, an Electronics Engineering <u>fresher</u> at RVCE, Bangalore. My passion for programming and game development began in 6th grade and I’ve been honing my skills ever since.
+I’m also actively developing my understanding of electronics (and hardware in general) as well as my expertise in competitive programming. 
+<br><br>My current skillset consists of mostly C/C++ along with some <u>parallel</u> programming (GLSL/CUDA/OpenCL).</p>
+		
+<p style="font-size: 1.6rem;"> I'm current working as a Rendering Programmer at <u><b><a href="http://voxelfy.de/" target="_blank">VoxelFy</a></u></b> (a german based architecture startup).</p>
 		<hr style="border: 0; height: 1px; background-color: #ddd; margin: 100px 0;">
 		<h1><u>Public Projects</u></h1>
         <div class="project">
@@ -342,17 +340,30 @@ I’m also actively developing my understanding of electronics (and hardware in 
                 <img src="https://github.com/swr06/Basic_Archiving_Tool/raw/master/branding/Logo.png" alt="MC Screenshot 1" width="360">
             </div>
         </div>
+		
 
+		<h1><u>WIP Projects</u></h1>
+		<div class="project">
+            <h2>YACE (Yet Another Chess Engine)</h2>
+            
+            <p style="font-size: 1.25rem;">A WIP Chess Engine made in collaboration with <u><a href="https://github.com/p41nt">shob:wq</a></u></p>
+            <div style="display: flex; justify-content: center; gap: 20px;">
+                <img src="https://github.com/swr06/swr06.github.io/blob/main/y1.png?raw=true" alt="Y Screenshot 1" width="400">
+                <img src="https://github.com/swr06/swr06.github.io/blob/main/y2.png?raw=true" alt="Y Screenshot 2" width="400">
+            </div>
+        </div>
+		
     </div>
     <div class="buttons">
         <a href="https://github.com/swr06/" target="_blank">
             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub Logo">GitHub
         </a>
 		
+		<br> 
         <a href="https://www.linkedin.com/in/samuel-wesley-rasquinha-36196b25b/" target="_blank">
             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="LinkedIn Logo">LinkedIn
         </a>
-
+		<br>
         <a href="https://x.com/SamuelRasquinha" target="_blank">
             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt="Twitter Logo">Twitter
         </a>
