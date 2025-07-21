@@ -2,386 +2,89 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
-	<meta name="viewport" content="width=1024">
-    <title>swr06 - Portfolio</title>
-    <style>
-        body, html {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: black;
-            font-family: Consolas, monospace;
-        }
-        canvas {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        .overlay {
-            position: absolute;
-            top: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            padding: 4px;
-            border-radius: 8px;
-            color: white;
-            text-align: center;
-            width: 58%;
-            max-width: 950px;
-            font-size: 36px;
-            font-weight: bold;
-            text-decoration: underline;
-            border: 2px solid white;
-        }
-        .projects {
-			position: absolute;
-			top: 15%;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 95%;
-			max-width: 1100px;
-			background: rgba(0, 0, 0, 0.4);
-			padding: 25px;
-			border-radius: 8px;
-			color: white;
-			max-height: 75vh;
-			overflow-y: auto;
-			scrollbar-width: none;
-			-ms-overflow-style: none;
-			border: 2px solid white;
-		}
-
-		.projects a {
-			color: white; /* Set hyperlink color to white */
-			text-decoration: none; /* Optional: remove underline if desired */
-		}
-
-		.projects a:hover {
-			text-decoration: underline; /* Optional: add underline on hover */
-		}
-
-        .projects::-webkit-scrollbar {
-            display: none;
-        }
-        .project {
-            margin-bottom: 35px;
-            padding-bottom: 35px;
-            border-bottom: 2px solid #bbb;
-            text-align: center;
-        }
-        .project h2 {
-            font-size: 28px;
-            text-decoration: underline;
-            margin-bottom: 12px;
-        }
-        .project p {
-            font-size: 18px;
-            margin-bottom: 12px;
-        }
-        .project img {
-            display: block;
-            max-width: 95%;
-            height: auto;
-            margin: 20px auto;
-            border: 2px solid white;
-            border-radius: 5px;
-        }
-        .buttons {
-			position: absolute;
-			top: 5%;
-			right: 0.5%;
-			display: flex;
-			flex-direction: column;
-			gap: 1px;
-			transform: scale(0.8); /* Scales down the entire container to 60% */
-			transform-origin: top right; /* Keeps the top-right corner fixed while scaling */
-		}
-
-        .buttons a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 5px 15px;
-            background: white;
-            color: black;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .buttons a:hover {
-            background: #4db8ff;
-            color: white;
-        }
-        .buttons img {
-            width: 20px;
-            height: 20px;
-            margin-right: 8px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samuel Rasquinha :: Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-    <canvas id="glCanvas"></canvas>
-    <script type="x-shader/x-fragment" id="fragment-shader">
-        precision highp float;
-        uniform vec2 iResolution;
-        uniform float iTime;
-        
-        
-        float Bayer2(vec2 a) {
-            a = floor(a);
-            return fract(a.x / 2. + a.y * a.y * .75);
-        }
-        
-        #define Bayer4(a)   (Bayer2 (.5 *(a)) * .25 + Bayer2(a))
-        #define Bayer8(a)   (Bayer4 (.5 *(a)) * .25 + Bayer2(a))
-        #define Bayer16(a)  (Bayer8 (.5 *(a)) * .25 + Bayer2(a))
-        #define Bayer32(a)  (Bayer16(.5 *(a)) * .25 + Bayer2(a))
-        #define Bayer64(a)  (Bayer32(.5 *(a)) * .25 + Bayer2(a))
-        
-        bool hit(vec3 orig, vec3 dir, vec3 center, float r, out vec3 intersect) {
-            vec3 oc = orig - center;
-            float b = dot(oc, dir);
-            float c = dot(oc, oc) - r * r;
-            if (c > 0.0 && b > 0.0) return false;
-            float discriminant = b * b - c;
-            if (discriminant < 0.0) return false;
-            float t = -b - sqrt(discriminant);
-            if (t < 0.0) return false;
-            intersect = orig + t * dir;
-            return true;
-        }
-		
-		
-		vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
-		{
-			return a + b*cos( 6.28318*(c*t+d) );
-		}
-        
-        vec4 sph(in vec2 fragCoord) {
-			float off = sin(iTime) * 0.5 + 0.5;
-			vec3 ccol = clamp(pal(off, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.33,0.67) ),0.,1.);
-            vec4 color = vec4(0.3, 0.3, 0.3, 0.1) * 0.;
-            vec2 uv = fragCoord / iResolution.xy;
-            float near = 0.2;
-            vec3 p = vec3(uv * 2.0 - 1.0, near);
-            p.x *= iResolution.x / iResolution.y;
-            vec3 camera = vec3(0.0, 0.0, 5.0);
-            vec3 dir = normalize(p - camera);
-            vec3 sphereCenter = vec3(0.0, 0.0, 0.0);
-            float sphereRadius = 0.8;
-            vec3 intersect;
-            bool isHit = hit(camera, dir, sphereCenter, sphereRadius, intersect);
-            if (isHit) {
-                vec3 light = normalize(vec3(4.0 * sin(iTime * 0.3), 1.0, 4.0 * cos(iTime * 0.3)));
-                vec3 normal = normalize(intersect - sphereCenter);
-                float diffuse = dot(light, normal);
-                color = vec4(ccol * 0.2,0.0);
-				color += max(clamp(diffuse,0.,1.) * vec4(ccol * 255., 255.0) / vec4(255.0), 0.);
-            }
-            return color;
-        }
-		
-		
-        const float VarFlt = 0.5;
-        vec4 colorize(in vec4 color) {
-            vec3 nCol = normalize(color.rgb);
-            float nLen = length(color.rgb);
-			float COLOR_STEP = mix(12.,64.,1. - abs(sin(iTime*VarFlt)  * sin(iTime*VarFlt)));
-            return vec4(nCol * floor((nLen * COLOR_STEP)+0.5) / COLOR_STEP, color.w);
-        }
-        
-        void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-            float ratio = iResolution.y / 720.0;
-			float PIXEL_SIZE = 1. + floor(abs(sin(iTime*VarFlt) * sin(iTime * VarFlt) ) * 16.);
-             vec2 pixel = floor(fragCoord / (PIXEL_SIZE * ratio) + 0.5) * PIXEL_SIZE * ratio;
-            vec2 uv = pixel / iResolution.xy;
-            float amount = 0.0;
-            vec4 col;
-            col.r = sph(iResolution.xy * vec2(uv.x + amount, uv.y)).r;
-            col.g = sph(iResolution.xy * uv).g;
-            col.b = sph(iResolution.xy * vec2(uv.x - amount, uv.y)).b;
-            col *= (1.0 - amount * 0.5);
-			col *= 1.3;
-            fragColor = colorize(col) + Bayer32((fragCoord / PIXEL_SIZE)) * 0.02;
-        }
-        
-        void main() {
-            mainImage(gl_FragColor, gl_FragCoord.xy);
-        }
-    </script>
+    <audio id="audio-hover" src="hover.wav" preload="auto"></audio>
+    <audio id="audio-click" src="click.wav" preload="auto"></audio>
+    <audio id="audio-start" src="start.wav" preload="auto"></audio>
 
-    <div class="overlay">
-        Samuel Rasquinha
+    <div id="start-screen">
+        <h1 class="name-title" data-text="Samuel Rasquinha">Samuel Rasquinha</h1>
+        <p class="press-start"><u>Press Any Key To Start</u></p>
     </div>
-    <div class="projects">
-		<h1><u>Introduction</u></h1>
-		<p style="font-size: 1.6rem;"> Hello! I’m Samuel, an Electronics Engineering <u>fresher</u> at RVCE, Bangalore. My passion for programming and game development began in 6th grade and I’ve been honing my skills ever since.
-I’m also actively developing my understanding of electronics (and hardware in general) as well as my expertise in competitive programming. 
-<br><br>My current skillset consists of mostly C/C++ along with some <u>parallel</u> programming (GLSL/CUDA/OpenCL).</p>
-		
-<p style="font-size: 1.6rem;"> I'm current working as a Rendering Programmer at <u><b><a href="http://voxelfy.de/" target="_blank">VoxelFy</a></u></b> (a german based architecture startup).</p>
-		<hr style="border: 0; height: 1px; background-color: #ddd; margin: 100px 0;">
-		<h1><u>Public Projects</u></h1>
-        <div class="project">
-            <h2><a href="https://github.com/swr06/Candela">Candela</a></h2>
-            <img src="https://github.com/swr06/Candela/raw/MainBranch/Branding/logo.png" alt="Candela Logo" width="180">
-           <p style="font-size: 1.25rem;">Candela is an experimental engine that prioritizes both performance and visuals. The primary objective of the engine was to serve as a tool for enhancing my knowledge and understanding of light transport, filtering, physically-based rendering, volumetrics, and intersection algorithms. </p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/Candela/raw/MainBranch/Screenshots/18.png" alt="Candela Screenshot 1" width="360">
-                <img src="https://github.com/swr06/Candela/raw/MainBranch/Screenshots/19.png" alt="Candela Screenshot 2" width="360">
-                <img src="https://github.com/swr06/Candela/raw/MainBranch/Screenshots/22.png" alt="Candela Screenshot 3" width="360">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/VoxelPathTracer">VXPT (Voxel Path Tracer)</a></h2>
-            <img src="https://github.com/swr06/VoxelPathTracer/raw/Project-Main/Logo/logo.png" alt="VX Logo" width="180">
-            <p style="font-size: 1.25rem;">A Voxel Path Tracing Engine focusing on performance and graphics. Created as a learning tool for light transport, physically based rendering, volumetrics, and intersection algorithms. Built from scratch with C++17 and modern OpenGL programmable pipeline. </p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/VoxelPathTracer/raw/Project-Main/Screenshots/glare.png" alt="VXPT Screenshot 1" width="360">
-                <img src="https://github.com/swr06/VoxelPathTracer/raw/Project-Main/Screenshots/craft.png" alt="VXPT Screenshot 2" width="360">
-                <img src="https://github.com/swr06/VoxelPathTracer/raw/Project-Main/Screenshots/n1.png" alt="VXPT Screenshot 3" width="360">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/GLGame">GLGame</a></h2>
-            <img src="https://github.com/swr06/GLGame/raw/master/Branding/logo1.png" alt="GLG Logo" width="600">
-            <p style="font-size: 1.25rem;">GLGame is a Tiny 2D OpenGL Powered Game Engine that is simple, lightweight and easy to use. </p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/GLGame/raw/master/Docs/Readme/Lighting%20demo.png" alt="VXPT Screenshot 1" width="360">
-                <img src="https://github.com/swr06/GLGame/raw/master/Docs/Readme/Particle%20Demo.png" alt="VXPT Screenshot 2" width="360">
-                <img src="https://github.com/swr06/GLGame/raw/master/Docs/Readme/Lighting%20demo%20-%201.PNG" alt="VXPT Screenshot 3" width="360">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/GPUSimulation">Physarum Transport Networks</a></h2>
-            <p style="font-size: 1.25rem;">A Basic Slime Mould Simulation based on a positive feedback loop and diffusion. </p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/GPUSimulation/raw/main/Screenshots/1.png" alt="SL Screenshot 1" width="360">
-                <img src="https://github.com/swr06/GPUSimulation/raw/main/Screenshots/3.png" alt="SL Screenshot 2" width="360">
-                <img src="https://github.com/swr06/GPUSimulation/raw/main/Screenshots/4.png" alt="SL Screenshot 3" width="360">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/WaterSurfaceSimulator">Water Surface Simulator</a></h2>
-            <p style="font-size: 1.25rem;">A simple heightmap CPU based fluid simulation.</p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/WaterSurfaceSimulator/raw/main/Screenshots/1.png" alt="SL Screenshot 1" width="360">
-				<img src="https://github.com/swr06/WaterSurfaceSimulator/raw/main/Screenshots/2.png" alt="SL Screenshot 2" width="360">
-				<img src="https://github.com/swr06/WaterSurfaceSimulator/raw/main/Screenshots/3.png" alt="SL Screenshot 3" width="360">
-            </div>
-        </div>
 
-	    <div class="project">
-            <h2><a href="https://github.com/swr06/Lensing">Gravitational Lensing</a></h2>
-            <p style="font-size: 1.25rem;">A simple gravitational lensing simulation. </p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/Lensing/raw/main/Screenshots/1.png" alt="GL Screenshot 1" width="360">
-                <img src="https://github.com/swr06/Lensing/raw/main/Screenshots/2.png" alt="GL Screenshot 2" width="360">
-                <img src="https://github.com/swr06/Lensing/raw/main/Screenshots/3.png" alt="GL Screenshot 3" width="360">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/YDSE">Young's Slit Experiment Simulation</a></h2>
-            <p style="font-size: 1.25rem;">A simple simulation of young's experiment that supports an arbitrary number of slits.</p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/YDSE/raw/main/image.png" alt="YD Screenshot 1" width="500">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/VolumetricDisplay">Volumetric Display Simulation</a></h2>
-            <p style="font-size: 1.25rem;">A simple simulation of a volumetric display that uses a rapidly rotating 2D screen to fake a 3D effect.</p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://raw.githubusercontent.com/swr06/VolumetricDisplay/refs/heads/main/Source/Res/1.png" alt="VD Screenshot 1" width="360">
-				<img src="https://raw.githubusercontent.com/swr06/VolumetricDisplay/refs/heads/main/Source/Res/2.png" alt="VD Screenshot 1" width="360">
-				<img src="https://raw.githubusercontent.com/swr06/VolumetricDisplay/refs/heads/main/Source/Res/3.png" alt="VD Screenshot 1" width="360">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/ThermalSimulation">Volumetric Heat Simulation</a></h2>
-            <p style="font-size: 1.25rem;">A simple simulation that uses a feedback loop to solve the heat differential over time.</p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/ThermalSimulation/blob/main/Source/Res/1.png?raw=true" alt="HD Screenshot 1" width="360">
-				<img src="https://github.com/swr06/ThermalSimulation/blob/main/Source/Res/2.png?raw=true" alt="HD Screenshot 1" width="360">
-				<img src="https://github.com/swr06/ThermalSimulation/blob/main/Source/Res/3.png?raw=true" alt="HD Screenshot 1" width="360">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2>Smooth Grapher</h2>
-            <p style="font-size: 1.25rem;">An attempt to make manim-like math animations from scratch.</p>
-  
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/swr06.github.io/blob/main/graph.gif?raw=true" alt="G Screenshot 1" width="450">
-				<img src="https://github.com/swr06/swr06.github.io/blob/main/graph2.gif?raw=true" alt="G Screenshot 2" width="450">
-            </div>
-        </div>
-		
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/Minecraft">Minecraft</a></h2>
-            
-            <p style="font-size: 1.25rem;">A Tiny Minecraft clone made with C++17 and OpenGL.</p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/Minecraft/raw/master/Screenshots/light-2.png" alt="MC Screenshot 1" width="360">
-                <img src="https://github.com/swr06/Minecraft/raw/master/Screenshots/gen-2.png" alt="MC Screenshot 2" width="360">
-                <img src="https://github.com/swr06/Minecraft/raw/master/Screenshots/gen-1.png" alt="MC Screenshot 3" width="360">
-            </div>
-        </div>
-		
-		<div class="project">
-            <h2><a href="https://github.com/swr06/Basic_Archiving_Tool">BAT (Basic Archiving Tool)</a></h2>
-            
-            <p style="font-size: 1.25rem;">A Tiny archiving tool made using C++17.</p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/Basic_Archiving_Tool/raw/master/branding/Logo.png" alt="MC Screenshot 1" width="360">
-            </div>
-        </div>
-		
+    <canvas id="gl-canvas"></canvas>
+    <div class="scanlines"></div>
+    
+    <div class="container is-hidden">
+        <header class="header">
+            <h1 class="name-title" data-text="Samuel Rasquinha">Samuel Rasquinha</h1>
+            <p class="subtitle">~ Programming and Electronics ~</p>
+        </header>
 
-		<h1><u>WIP Projects</u></h1>
-		<div class="project">
-            <h2>YACE (Yet Another Chess Engine)</h2>
-            
-            <p style="font-size: 1.25rem;">A WIP Chess Engine made in collaboration with <u><a href="https://github.com/p41nt">shob:wq</a></u></p>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <img src="https://github.com/swr06/swr06.github.io/blob/main/y1.png?raw=true" alt="Y Screenshot 1" width="400">
-                <img src="https://github.com/swr06/swr06.github.io/blob/main/y2.png?raw=true" alt="Y Screenshot 2" width="400">
+        <main>
+            <section class="section">
+                <div class="section-title-wrapper"><h2 class="section-title" data-text="> Introduction"></h2></div>
+                <div class="nes-container with-title is-dark">
+                    <p class="title">README.md</p>
+                    <p>Hello! I’m Samuel, an Electronics Engineering fresher at RVCE, Bangalore. My passion for programming and game development began in 6th grade, and I'm currently leveling up my skills in electronics, hardware, and competitive programming.</p>
+                    <p>My skillset is centered on C/C++ and parallel programming (GLSL/CUDA/OpenCL). I'm currently working as a Rendering Programmer at <b><a href="http://voxelfy.de/" target="_blank">VoxelFy</a></b>. (a german based architecture startup)</p>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-title-wrapper"><h2 class="section-title" data-text="> Public Projects"></h2></div>
+                <div class="project-grid">
+
+                    <!-- ALL PROJECTS NOW INCLUDED -->
+                    <div class="project-card" data-slideshow-interval="4000"><a href="https://github.com/swr06/Candela" target="_blank"><div class="image-container"><img src="https://github.com/swr06/Candela/raw/MainBranch/Branding/logo.png" class="active"><img src="https://github.com/swr06/Candela/raw/MainBranch/Screenshots/18.png"><img src="https://github.com/swr06/Candela/raw/MainBranch/Screenshots/19.png"><img src="https://github.com/swr06/Candela/raw/MainBranch/Screenshots/22.png"></div><div class="card-text"><h3>Candela</h3><p>High-performance engine for advanced visuals and light transport.</p></div></a></div>
+                    <div class="project-card" data-slideshow-interval="4200"><a href="https://github.com/swr06/VoxelPathTracer" target="_blank"><div class="image-container"><img src="https://github.com/swr06/VoxelPathTracer/raw/Project-Main/Logo/logo.png" class="active"><img src="https://github.com/swr06/VoxelPathTracer/raw/Project-Main/Screenshots/glare.png"><img src="https://github.com/swr06/VoxelPathTracer/raw/Project-Main/Screenshots/craft.png"><img src="https://github.com/swr06/VoxelPathTracer/raw/Project-Main/Screenshots/n1.png"></div><div class="card-text"><h3>VXPT</h3><p>Voxel Path Tracing engine built with C++17 & modern OpenGL.</p></div></a></div>
+                    <div class="project-card" data-slideshow-interval="3800"><a href="https://github.com/swr06/GLGame" target="_blank"><div class="image-container"><img src="https://github.com/swr06/GLGame/raw/master/Branding/logo1.png" class="active"><img src="https://github.com/swr06/GLGame/raw/master/Docs/Readme/Lighting%20demo.png"><img src="https://github.com/swr06/GLGame/raw/master/Docs/Readme/Particle%20Demo.png"></div><div class="card-text"><h3>GLGame</h3><p>A tiny, lightweight, and simple 2D OpenGL game engine.</p></div></a></div>
+                    <div class="project-card" data-slideshow-interval="4100"><a href="https://github.com/swr06/GPUSimulation" target="_blank"><div class="image-container"><img src="https://github.com/swr06/GPUSimulation/raw/main/Screenshots/1.png" class="active"><img src="https://github.com/swr06/GPUSimulation/raw/main/Screenshots/3.png"><img src="https://github.com/swr06/GPUSimulation/raw/main/Screenshots/4.png"></div><div class="card-text"><h3>Physarum Transport</h3><p>A GPU-accelerated slime mould simulation based on diffusion.</p></div></a></div>
+                    <div class="project-card" data-slideshow-interval="3900"><a href="https://github.com/swr06/WaterSurfaceSimulator" target="_blank"><div class="image-container"><img src="https://github.com/swr06/WaterSurfaceSimulator/raw/main/Screenshots/1.png" class="active"><img src="https://github.com/swr06/WaterSurfaceSimulator/raw/main/Screenshots/2.png"><img src="https://github.com/swr06/WaterSurfaceSimulator/raw/main/Screenshots/3.png"></div><div class="card-text"><h3>Water Surface Sim</h3><p>A simple and interactive heightmap fluid simulation on the CPU.</p></div></a></div>
+                    <div class="project-card" data-slideshow-interval="4300"><a href="https://github.com/swr06/Lensing" target="_blank"><div class="image-container"><img src="https://github.com/swr06/Lensing/raw/main/Screenshots/1.png" class="active"><img src="https://github.com/swr06/Lensing/raw/main/Screenshots/2.png"><img src="https://github.com/swr06/Lensing/raw/main/Screenshots/3.png"></div><div class="card-text"><h3>Gravitational Lensing</h3><p>A simulation demonstrating the warping of spacetime by mass.</p></div></a></div>
+                    <div class="project-card" data-slideshow-interval="4400"><a href="https://github.com/swr06/VolumetricDisplay" target="_blank"><div class="image-container"><img src="https://raw.githubusercontent.com/swr06/VolumetricDisplay/refs/heads/main/Source/Res/1.png" class="active"><img src="https://raw.githubusercontent.com/swr06/VolumetricDisplay/refs/heads/main/Source/Res/2.png"><img src="https://raw.githubusercontent.com/swr06/VolumetricDisplay/refs/heads/main/Source/Res/3.png"></div><div class="card-text"><h3>Volumetric Display</h3><p>Simulating a 3D effect with a rapidly rotating 2D screen.</p></div></a></div>
+                    <div class="project-card" data-slideshow-interval="5000"><a href="#"><div class="image-container"><img src="https://github.com/swr06/swr06.github.io/blob/main/graph.gif?raw=true" class="active"><img src="https://github.com/swr06/swr06.github.io/blob/main/graph2.gif?raw=true"></div><div class="card-text"><h3>Smooth Grapher</h3><p>An attempt to create Manim-like math animations from scratch.</p></div></a></div>
+                    <div class="project-card" data-slideshow-interval="3700"><a href="https://github.com/swr06/Minecraft" target="_blank"><div class="image-container"><img src="https://github.com/swr06/Minecraft/raw/master/Screenshots/gen-1.png" class="active"><img src="https://github.com/swr06/Minecraft/raw/master/Screenshots/gen-2.png"><img src="https://github.com/swr06/Minecraft/raw/master/Screenshots/light-2.png"></div><div class="card-text"><h3>Minecraft Clone</h3><p>A tiny Minecraft clone created with C++17 and OpenGL.</p></div></a></div>
+
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-title-wrapper"><h2 class="section-title" data-text="> WIP Projects"></h2></div>
+                <div class="project-grid-single">
+                    <div class="project-card">
+                        <!-- CRITICAL FIX: The entire card content is wrapped in a container -->
+                        <div class="wip-container">
+                            <div class="wip-images">
+                                <img src="https://github.com/swr06/swr06.github.io/blob/main/y1.png?raw=true" alt="YACE 1">
+                                <img src="https://github.com/swr06/swr06.github.io/blob/main/y2.png?raw=true" alt="YACE 2">
+                            </div>
+                            <div class="card-text">
+                                <h3><a href="#">YACE (Chess Engine)</a></h3>
+                                <p>A work-in-progress Chess Engine in collaboration with <a href="https://github.com/p41nt" target="_blank">shob:wq</a>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+             <div class="section-title-wrapper"><h2 class="section-title" data-text="> Connect"></h2></div>
+             <div class="social-links">
+                <a href="https://github.com/swr06/" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"><span>GitHub</span></a>
+                <a href="https://www.linkedin.com/in/samuel-wesley-rasquinha-36196b25b/" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-plain.svg" alt="LinkedIn"><span>LinkedIn</span></a>
+                <a href="https://x.com/SamuelRasquinha" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt="Twitter/X"><span>Twitter</span></a>
             </div>
-        </div>
-		
+        </footer>
     </div>
-    <div class="buttons">
-        <a href="https://github.com/swr06/" target="_blank">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub Logo">GitHub
-        </a>
-		
-		<br> 
-        <a href="https://www.linkedin.com/in/samuel-wesley-rasquinha-36196b25b/" target="_blank">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="LinkedIn Logo">LinkedIn
-        </a>
-		<br>
-        <a href="https://x.com/SamuelRasquinha" target="_blank">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt="Twitter Logo">Twitter
-        </a>
-		
-    </div>
-	
 
-    <script src="webgl-setup.js"></script>
+    <script src="webgl-background.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
