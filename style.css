@@ -81,3 +81,33 @@ a:hover { color: var(--border-highlight); }
 .social-btn:hover { background: #444; animation: hover-shake 0.3s linear; }
 .social-btn:active { transform: translate(4px, 4px); box-shadow: none; }
 .social-btn img { width: 24px; height: 24px; filter: brightness(0) invert(1); }
+
+/* --- 8-Bit Particle Effect Styles --- */
+
+/* This sets up the body for the effect. */
+/* You may need to merge this with your existing body style. */
+body {
+  /* This changes the mouse cursor. Keep this! */
+  cursor: crosshair; 
+}
+
+/* This is the transparent canvas that sits over your whole site. */
+#particle-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* This is crucial: it lets you click on your actual website content. */
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* This styles each individual particle as an 8-bit square. */
+.particle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* This creates the black shadow for the pixelated look. */
+  box-shadow: 2px 2px 0px #000;
+}
