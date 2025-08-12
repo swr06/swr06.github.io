@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL On-Demand Benchmark</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>WebGL On-Demand Probe Benchmark</h1>
+    <canvas id="glcanvas" width="800" height="600"></canvas>
+    
+    <div class="info-panel">
+        <div id="info-left"></div>
+        <div id="info-right"></div>
+    </div>
+
+    <div class="controls">
+        <div class="slider-container">
+            <label for="dragon-slider">Dragons per Probe Face:</label>
+            <input type="range" min="10" max="200000" value="1000" class="slider" id="dragon-slider">
+            <span id="dragon-count-display">1,000</span>
+        </div>
+        <!-- This is the new benchmark button -->
+        <button id="render-probes-button">Render Probes Once</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
