@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog :: Graphics Optimization</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+	<div id="particle-canvas"></div>
+
+    <audio id="audio-hover" src="hover.wav" preload="auto"></audio>
+    <audio id="audio-click" src="click.wav" preload="auto"></audio>
+    <!-- Start audio not needed here, but ID kept for JS compatibility if needed -->
+    <audio id="audio-start" src="start.wav" preload="auto"></audio>
+
+    <canvas id="gl-canvas"></canvas>
+    <div class="scanlines"></div>
+    
+    <!-- No "start-screen" div here, so content loads immediately -->
+
+    <div class="container is-hidden">
+        
+        <!-- Navigation -->
+        <nav style="margin-bottom: 3rem; margin-top: 1rem;">
+            <a href="index.html" class="social-btn back-btn">
+                <span>&lt; Back to Home</span>
+            </a>
+        </nav>
+
+        <header class="header" style="margin-bottom: 3rem;">
+            <h1 class="name-title" data-text="Graphics Optimization">Graphics Optimization</h1>
+            <p class="subtitle">~ Jan 25, 2026 ~</p>
+        </header>
+
+        <main>
+            <article class="section">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title" data-text="> Ray-Box Intersection"></h2>
+                </div>
+                
+                <div class="nes-container with-title is-dark blog-content">
+                    <p class="title">post_01.txt</p>
+                    
+                    <p>Optimizing intersection algorithms is crucial for high-performance path tracing. In this post, I explore the slab method for AABB intersection.</p>
+                    
+                    <br>
+                    <h3>The Concept</h3>
+                    <p>The slab method works by treating the box as the intersection of three pairs of parallel planes.</p>
+                    
+                    <div class="code-block">
+                        <pre>
+// CUDA Implementation
+__device__ bool intersect(const Ray& r, const AABB& box) {
+    float tmin = -1e20, tmax = 1e20;
+    // ... optimization logic here ...
+    return tmax > tmin;
+}
+                        </pre>
+                    </div>
+
+                    <br>
+                    <h3>Benchmarks</h3>
+                    <p>Using the optimized approach, frame times dropped from 16ms to 12ms on an RTX 3060.</p>
+                    
+                    <blockquote>
+                        "Premature optimization is the root of all evil, but this one was worth it."
+                    </blockquote>
+                </div>
+            </article>
+        </main>
+
+        <footer class="footer">
+             <div class="section-title-wrapper"><h2 class="section-title" data-text="> Connect"></h2></div>
+             <div class="social-links">
+                <a href="https://github.com/swr06/" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"><span>GitHub</span></a>
+                <a href="https://x.com/SamuelRasquinha" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt="Twitter/X"><span>Twitter</span></a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="webgl-background.js"></script>
+    <script src="app.js"></script>
+	
+    <!-- Particle Script included here to maintain visual consistency -->
+	<script>
+	(function() {
+	  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+	  if (isMobile) return;
+	  const canvas = document.getElementById('particle-canvas');
+	  if (!canvas) return;
+	  const particles = [];
+	  const gravity = 0.2; 
+	  document.addEventListener('mousemove', function(e) { if (Math.random() > 0.4) createParticle(e.clientX, e.clientY, 'trail'); });
+	  document.addEventListener('click', function(e) { for (let i = 0; i < 20; i++) createParticle(e.clientX, e.clientY, 'burst'); });
+	  function createParticle(x, y, type) {
+		const particle = { element: document.createElement('div'), x: x, y: y, vx: 0, vy: 0, size: 0, life: 0, initialLife: 0, bounces: 2 };
+		if (type === 'trail') {
+		  const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 0.5;
+		  particle.vx = Math.cos(angle) * speed; particle.vy = Math.sin(angle) * speed;
+		  particle.size = Math.random() * 3 + 2; particle.life = Math.random() * 20 + 45;
+		} else { 
+		  const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 2.5 + 1; 
+		  particle.vx = Math.cos(angle) * speed; particle.vy = Math.sin(angle) * speed - 2;
+		  particle.size = Math.random() * 5 + 3; particle.life = Math.random() * 50 + 110;
+		}
+		particle.initialLife = particle.life; particle.element.classList.add('particle');
+		particle.element.style.width = `${particle.size}px`; particle.element.style.height = `${particle.size}px`;
+		particle.element.style.background = `hsl(${Math.random() * 50 + 90}, 90%, 60%)`;
+		canvas.appendChild(particle.element); particles.push(particle);
+	  }
+	  function update() {
+		for (let i = particles.length - 1; i >= 0; i--) {
+		  const p = particles[i]; p.vy += gravity; p.x += p.vx; p.y += p.vy; p.life--;
+		  if (p.y + p.size >= window.innerHeight && p.bounces > 0) { p.y = window.innerHeight - p.size; p.vy *= -0.5; p.vx *= 0.7; p.bounces--; }
+		  if (p.life <= 0) { p.element.remove(); particles.splice(i, 1); continue; }
+		  p.element.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`; p.element.style.opacity = p.life / p.initialLife;
+		}
+		requestAnimationFrame(update);
+	  }
+	  requestAnimationFrame(update);
+	})();
+	</script>
+</body>
+</html>
