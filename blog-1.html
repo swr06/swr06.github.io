@@ -3,13 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog :: Graphics Optimization</title>
+    <title>Blog :: Audio Spectrum Analysis</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* Add specific styles for the video containers to match the aesthetic */
+        .retro-media-box {
+            background: #000;
+            border: 4px solid #444;
+            box-shadow: 5px 5px 0px #222;
+            padding: 10px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        .retro-media-box video {
+            width: 100%;
+            height: auto;
+            display: block;
+            /* slight sepia/contrast filter for retro monitor feel */
+            filter: contrast(1.1) brightness(0.9); 
+        }
+
+        .retro-caption {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
     <div id="custom-cursor"></div>
-	<div id="particle-canvas"></div>
+    <div id="particle-canvas"></div>
 
     <audio id="audio-hover" src="hover.wav" preload="auto"></audio>
     <audio id="audio-click" src="click.wav" preload="auto"></audio>
@@ -19,7 +45,6 @@
     
     <div class="container is-hidden">
         
-        <!-- Navigation -->
         <nav style="margin-bottom: 3rem; margin-top: 1rem;">
             <a href="index.html" class="social-btn back-btn">
                 <span>&lt; Back to Home</span>
@@ -27,42 +52,140 @@
         </nav>
 
         <header class="header" style="margin-bottom: 3rem;">
-            <h1 class="name-title" data-text="Graphics Optimization">Graphics Optimization</h1>
-            <p class="subtitle">~ Jan 25, 2026 ~</p>
+            <h1 class="name-title" data-text="Audio Spectrum Analysis">Audio Spectrum Analysis</h1>
+            <p class="subtitle">~ Jan 31, 2026 ~</p>
         </header>
 
         <main>
             <article class="section">
                 <div class="section-title-wrapper">
-                    <h2 class="section-title" data-text="> Ray-Box Intersection"></h2>
+                    <h2 class="section-title" data-text="> Understanding the DFT"></h2>
                 </div>
                 
                 <div class="nes-container with-title is-dark blog-content">
-                    <p class="title">post_01.txt</p>
+                    <p class="title">DftCore.cpp</p>
                     
-                    <p>Optimizing intersection algorithms is crucial for high-performance path tracing. In this post, I explore the slab method for AABB intersection.</p>
+                    <p>To analyze audio signals programmatically, we must bridge the gap between the time domain and the frequency domain. The Discrete Fourier Transform (DFT) is the mathematical key to this portal.</p>
                     
                     <br>
-                    <h3>The Concept</h3>
-                    <p>The slab method works by treating the box as the intersection of three pairs of parallel planes.</p>
                     
+                    <div style="text-align: center; margin: 2rem 0; padding: 1rem; border: 2px dashed #444;">
+                        <img src="dfteq.png" alt="DFT Equation" style="max-width: 100%; height: auto; image-rendering: pixelated;">
+                    </div>
+
+                    <p>e^-j(2&pi;kn/N) can be thought of as the complex "weight" or amplitude of the kth frequency. In this case, the kth frequency is one whose samples are spread over k rotations over the complex unit circle.</p>
+                    
+                    <br>
+                    
+                    <h3>Programming the naive DFT - Starting with a Single Bin</h3>
+                    <p>First, we define a function to calculate the energy for just <strong>one specific frequency</strong> (k). This projects the signal onto a specific sine/cosine wave.</p>
+
                     <div class="code-block">
                         <pre>
-// CUDA Implementation
-__device__ bool intersect(const Ray& r, const AABB& box) {
-    float tmin = -1e20, tmax = 1e20;
-    // ... optimization logic here ...
-    return tmax > tmin;
+struct Complex { float Real; float Imag; };
+
+// Calculate DFT bin for a specific frequency index K
+Complex DftBin(const std::vector&lt;float&gt;& Signal, int K) {
+    int N = Signal.size();
+    Complex Xk = {0.0f, 0.0f};
+    
+    for (int n = 0; n < N; n++) {
+        // Euler's Formula: e^-ix = cos(x) - i*sin(x)
+        float theta = -2.0f * PI * K * n / N;
+        
+        Xk.Real += Signal[n] * std::cos(theta);
+        Xk.Imag += Signal[n] * std::sin(theta);
+    }
+    return Xk;
 }
                         </pre>
                     </div>
 
                     <br>
-                    <h3>Benchmarks</h3>
-                    <p>Using the optimized approach, frame times dropped from 16ms to 12ms on an RTX 3060.</p>
+
+                    <h3>Programming the Full Spectrum DFT</h3>
+                    <p>To build the complete frequency spectrum, we simply iterate through every possible integer frequency from 0 to N-1, collecting the results into a vector.</p>
+
+                    <div class="code-block">
+                        <pre>
+// The naive O(N^2) DFT implementation
+std::vector&lt;Complex&gt; FullDFT(const std::vector&lt;float&gt;& Signal) {
+    int N = Signal.size();
+    std::vector&lt;Complex&gt; Spectrum;
+
+    // Iterate through every frequency bin K
+    for (int k = 0; k < N; k++) {
+        Spectrum.push_back(DftBin(Signal, k));
+    }
+
+    return Spectrum;
+}
+                        </pre>
+                    </div>
+
+                    <br>
+                    <h3>Why is k integral exactly?</h3>
+                    <p>You might wonder why <span style="color: #ffcc00;">k</span> is always an integer (0, 1, 2...) rather than a decimal like 2.5.</p>
                     
+                    <p>The DFT assumes the signal of length N is periodic. For the math to work orthogonally, we are testing how many <strong>complete cycles</strong> fit exactly into our window of N samples.</p>
+                    
+                    <p>If <span style="color: #ffcc00;">k=1</span>, the wave fits once. If <span style="color: #ffcc00;">k=2</span>, it fits twice. These integer frequencies form a basis—a coordinate system for the signal space. If we used non-integers, our "coordinates" would overlap, breaking the clean decomposition of the signal.</p>
+
+                    <br>
+                    <h3>Visualizing the Wrap using a "Winding Machine"</h3>
+                    <p>The core mechanic of the DFT is "wrapping" the signal around the origin. When the wrap rate matches a frequency in the signal, the points line up.</p>
+
+                    <div class="retro-media-box">
+                        <video src="DFTWrapAroundScene.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                        <div class="retro-caption">Fig 1. Signal wrapping vs Center of Mass</div>
+                    </div>
+
+                    <p>Notice how the "Center of Mass" (the yellow dot) stays near the center (0,0) for most frequencies. However, when the winding frequency matches the signal's frequency, the graph aligns to the right, pulling the center of mass away from the origin. That distance is the magnitude of the frequency.</p>
+
+                    <br>
+                    <h3>Ok, now what if my frequency isn't integral?</h3>
+                    <p>Real-world audio doesn't care about our integer bins. A guitar string might vibrate at a frequency that lands at <span style="color: #ffcc00;">k = 5.4</span>.</p>
+
+                    <div class="retro-media-box">
+                        <video src="SpectralLeakageScene.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                        <div class="retro-caption">Fig 2. Discontinuity causing Energy Leakage</div>
+                    </div>
+
+                    <p>When the frequency doesn't complete a full cycle within the window N, the endpoints don't match up. This creates a sharp discontinuity if we were to loop the signal.</p>
+                    
+                    <p>The DFT interprets this sharp jump as a burst of energy across many frequencies. Consequently, the energy "leaks" from the main frequency bin into its neighbors. This is called <strong>Spectral Leakage</strong>.</p>
+                    
+                    <br>
+                    <h3>The Short Time Fourier Transform</h3>
+                    <p>The standard DFT has a fatal flaw: it is <strong>timeless</strong>.</p>
+                    
+                    <p>If you take the DFT of an entire song, the math will tell you exactly which notes were played, but it cannot tell you <em>when</em> they were played. A C-major chord played at the beginning looks mathematically identical to one played at the end.</p>
+                    
+                    <p>To solve this, we don't process the whole signal at once. Instead, we chop the signal into small, overlapping blocks (or "windows") and run the DFT on each block individually. This technique, the <strong>STFT</strong>, allows us to see how frequencies evolve over time.</p>
+
+                    <div class="retro-media-box">
+                        <video src="STFT.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                        <div class="retro-caption">Fig 3. Sliding window analysis (STFT)</div>
+                    </div>
+                    
+                    <br>
+                    <h3>Time vs Frequency Res Tradeoff</h3>
+                    <p>However, nature demands a price. We encounter a limit similar to the Heisenberg Uncertainty Principle.</p>
+                    
+                    <ul style="list-style-type: square; padding-left: 20px; color: #ccc;">
+                        <li style="margin-bottom: 10px;">To get precise <strong>Time</strong> information, we need very short windows.</li>
+                        <li>To get precise <strong>Frequency</strong> information, we need very long windows (larger N).</li>
+                    </ul>
+                    
+                    <p>If we shrink our window to pinpoint the exact millisecond a drum hit, our frequency bins become wide and coarse (poor resolution). If we widen the window to distinguish between 440Hz and 441Hz, we smear the event out over time.</p>
+
+                    <div class="retro-media-box">
+                        <video src="ResolutionTradeOff.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                        <div class="retro-caption">Fig 4. The Uncertainty Principle visualised</div>
+                    </div>
+
                     <blockquote>
-                        "Premature optimization is the root of all evil, but this one was worth it."
+                        "We are forever trapped between knowing when it happened, and knowing exactly what it was."
                     </blockquote>
                 </div>
             </article>
@@ -79,44 +202,44 @@ __device__ bool intersect(const Ray& r, const AABB& box) {
 
     <script src="webgl-background.js"></script>
     <script src="app.js"></script>
-	
-	<script>
-	(function() {
-	  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-	  if (isMobile) return;
-	  const canvas = document.getElementById('particle-canvas');
-	  if (!canvas) return;
-	  const particles = [];
-	  const gravity = 0.2; 
-	  document.addEventListener('mousemove', function(e) { if (Math.random() > 0.4) createParticle(e.clientX, e.clientY, 'trail'); });
-	  document.addEventListener('click', function(e) { for (let i = 0; i < 20; i++) createParticle(e.clientX, e.clientY, 'burst'); });
-	  function createParticle(x, y, type) {
-		const particle = { element: document.createElement('div'), x: x, y: y, vx: 0, vy: 0, size: 0, life: 0, initialLife: 0, bounces: 2 };
-		if (type === 'trail') {
-		  const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 0.5;
-		  particle.vx = Math.cos(angle) * speed; particle.vy = Math.sin(angle) * speed;
-		  particle.size = Math.random() * 3 + 2; particle.life = Math.random() * 20 + 45;
-		} else { 
-		  const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 2.5 + 1; 
-		  particle.vx = Math.cos(angle) * speed; particle.vy = Math.sin(angle) * speed - 2;
-		  particle.size = Math.random() * 5 + 3; particle.life = Math.random() * 50 + 110;
-		}
-		particle.initialLife = particle.life; particle.element.classList.add('particle');
-		particle.element.style.width = `${particle.size}px`; particle.element.style.height = `${particle.size}px`;
-		particle.element.style.background = `hsl(${Math.random() * 50 + 90}, 90%, 60%)`;
-		canvas.appendChild(particle.element); particles.push(particle);
-	  }
-	  function update() {
-		for (let i = particles.length - 1; i >= 0; i--) {
-		  const p = particles[i]; p.vy += gravity; p.x += p.vx; p.y += p.vy; p.life--;
-		  if (p.y + p.size >= window.innerHeight && p.bounces > 0) { p.y = window.innerHeight - p.size; p.vy *= -0.5; p.vx *= 0.7; p.bounces--; }
-		  if (p.life <= 0) { p.element.remove(); particles.splice(i, 1); continue; }
-		  p.element.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`; p.element.style.opacity = p.life / p.initialLife;
-		}
-		requestAnimationFrame(update);
-	  }
-	  requestAnimationFrame(update);
-	})();
-	</script>
+    
+    <script>
+    (function() {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) return;
+      const canvas = document.getElementById('particle-canvas');
+      if (!canvas) return;
+      const particles = [];
+      const gravity = 0.2; 
+      document.addEventListener('mousemove', function(e) { if (Math.random() > 0.4) createParticle(e.clientX, e.clientY, 'trail'); });
+      document.addEventListener('click', function(e) { for (let i = 0; i < 20; i++) createParticle(e.clientX, e.clientY, 'burst'); });
+      function createParticle(x, y, type) {
+        const particle = { element: document.createElement('div'), x: x, y: y, vx: 0, vy: 0, size: 0, life: 0, initialLife: 0, bounces: 2 };
+        if (type === 'trail') {
+          const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 0.5;
+          particle.vx = Math.cos(angle) * speed; particle.vy = Math.sin(angle) * speed;
+          particle.size = Math.random() * 3 + 2; particle.life = Math.random() * 20 + 45;
+        } else { 
+          const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 2.5 + 1; 
+          particle.vx = Math.cos(angle) * speed; particle.vy = Math.sin(angle) * speed - 2;
+          particle.size = Math.random() * 5 + 3; particle.life = Math.random() * 50 + 110;
+        }
+        particle.initialLife = particle.life; particle.element.classList.add('particle');
+        particle.element.style.width = `${particle.size}px`; particle.element.style.height = `${particle.size}px`;
+        particle.element.style.background = `hsl(${Math.random() * 50 + 90}, 90%, 60%)`;
+        canvas.appendChild(particle.element); particles.push(particle);
+      }
+      function update() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i]; p.vy += gravity; p.x += p.vx; p.y += p.vy; p.life--;
+          if (p.y + p.size >= window.innerHeight && p.bounces > 0) { p.y = window.innerHeight - p.size; p.vy *= -0.5; p.vx *= 0.7; p.bounces--; }
+          if (p.life <= 0) { p.element.remove(); particles.splice(i, 1); continue; }
+          p.element.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`; p.element.style.opacity = p.life / p.initialLife;
+        }
+        requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    })();
+    </script>
 </body>
 </html>
