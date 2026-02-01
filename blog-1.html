@@ -75,7 +75,7 @@
                 <p>e^-j(2&pi;kn/N) can be thought of as the complex "weight" or amplitude of the kth frequency. In this case, the kth frequency is one whose samples are spread over k rotations over the complex unit circle.</p>
                 
                 <br>
-                <h3>Why use e^i&theta; over just sine waves?</h3>
+                <h3>Why use e^i&theta; over just cosine waves (or sine waves)?</h3>
                 <p>You might ask: Why introduce complex numbers? Why not just correlate with standard cosine waves? This is one thing I initially was confused about.</p>
                 
                 <p>The problem with a simple cosine wave is that it is <strong>phase blind</strong>. Let's say your audio signal is a pure sine wave of frequency 3 Hz, correlating it with a Cosine wave of 3 hz results in zero, because they are orthogonal (90 degrees out of phase). The math would wrongly tell you that the frequency doesn't exist.</p>
@@ -87,7 +87,7 @@
                     <li><strong>Phase:</strong> atan(Imag, Real) (The starting angle)</li>
                 </ul>
 
-                <p>With <span style="color: #ffcc00;">atan2</span>, we can precisely calculate the phase shift required to reconstruct the original signal.</p>
+                <p>With <span style="color: #ffcc00;">atan</span>, we can precisely calculate the phase shift required to reconstruct the original signal.</p>
 
                 <br>
 
