@@ -151,7 +151,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                     <div class="retro-caption">Fig 1. Signal wrapping vs Center of Mass</div>
                 </div>
 
-                <p>Notice how the "Center of Mass" (the yellow dot) stays near the center (0,0) for most frequencies. However, when the winding frequency matches the signal's frequency, the graph aligns to the right, pulling the center of mass away from the origin. That distance is the magnitude of the frequency.</p>
+                <p>Notice how the "Center of Mass" (the red dot) stays near the center (0,0) for most frequencies. However, when the winding frequency matches the signal's frequency, the graph aligns to the right, pulling the center of mass away from the origin. That distance is the magnitude of the frequency.</p>
 
                 <br>
                 <h3>Ok, now what if my frequency isn't integral?</h3>
@@ -193,7 +193,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
 
                 <br>
                 <h3>The Hann Filter</h3>
-                <p>To fix the cliff, we cheat. We multiply the block by a "Window Function" like the <strong>Hann Filter</strong> before processing it. This shapes the audio into a smooth bell curve, tapering the jagged edges down to zero.</p>
+                <p>To fix the cliff, we cheat. We multiply the block by a "Window Function" like the <strong>Hann Filter</strong> before processing it. This shapes the audio into a smooth bell curve, tapering the jagged edges down to zero. We can then undo this transformation while taking the IDFT (inverse transform).</p>
 
                 <div class="retro-media-box">
                     <video src="han.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
