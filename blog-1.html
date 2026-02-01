@@ -44,10 +44,15 @@
 
     <div class="container is-hidden">
     
-    <nav style="margin-bottom: 3rem; margin-top: 1rem;">
-        <a href="index.html" class="social-btn back-btn">
+    <!-- Updated Navigation with Flexbox for Font Switcher -->
+    <nav style="margin-bottom: 3rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <a href="index.html" class="social-btn back-btn" style="margin-bottom: 0;">
             <span>&lt; Back to Home</span>
         </a>
+        
+        <button id="font-switcher" class="social-btn back-btn" style="margin-bottom: 0; font-family: inherit;">
+            <span>{ } Switch Font</span>
+        </button>
     </nav>
 
     <header class="header" style="margin-bottom: 3rem;">
@@ -354,6 +359,17 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
     requestAnimationFrame(update);
   }
   requestAnimationFrame(update);
+})();
+
+// Font Switcher Logic
+(function() {
+    const btn = document.getElementById('font-switcher');
+    if(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.body.classList.toggle('coding-mode');
+        });
+    }
 })();
 </script>
 </body>

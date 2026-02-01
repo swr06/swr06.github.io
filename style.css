@@ -86,6 +86,7 @@ body {
     padding: 0; 
     overflow-x: hidden;
     width: 100%;
+    transition: font-size 0.3s ease;
 }
 a, button, .project-card { cursor: none; } /* Ensure cursor remains hidden */
 
@@ -125,6 +126,7 @@ a:hover { color: var(--primary-color); }
     color: var(--border-highlight); 
     animation: title-shake 1.5s linear infinite; 
     line-height: 1.4;
+    transition: font-size 0.3s ease;
 }
 .name-title::before, .name-title::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
 .name-title::before { animation: aberration-r 2.5s infinite alternate-reverse; color: #ff003c; }
@@ -395,9 +397,7 @@ blockquote { border-left: 4px solid var(--accent-color); margin: 2rem 0; padding
         margin-bottom: 1rem;
     }
 
-    .wip-images {
-        flex-direction: column; 
-    }
+    /* REMOVED: .wip-images { flex-direction: column; } to fix Android display issue */
     
     .social-links {
         gap: 1rem;
@@ -419,4 +419,49 @@ blockquote { border-left: 4px solid var(--accent-color); margin: 2rem 0; padding
         right: 10%;
         text-align: center;
     }
+}
+
+/* --- FONT TOGGLE OVERRIDES --- */
+body.coding-mode {
+    font-family: 'Consolas', 'Courier New', monospace, sans-serif !important;
+    /* Increased to 1.4rem (40% bigger than base) */
+    font-size: 1.4rem; 
+    line-height: 1.6;
+}
+
+/* 1. Update Title to be 40% bigger */
+/* Original: 1.8rem -> 2.52rem | 4rem -> 5.6rem */
+body.coding-mode .name-title {
+    font-size: clamp(2.52rem, 8.4vw, 5.6rem); 
+    font-weight: 700;
+    letter-spacing: -2px;
+}
+
+/* 2. Switch specific elements from REM to EM so they inherit the 40% boost */
+
+/* Blog text & Code blocks */
+body.coding-mode .blog-content p,
+body.coding-mode .code-block pre {
+    font-size: 0.9em;
+}
+
+/* Captions, Buttons, and Card Text */
+body.coding-mode .card-text p,
+body.coding-mode .back-btn,
+body.coding-mode .social-btn,
+body.coding-mode .blog-date {
+    font-size: 0.8em;
+}
+
+/* Subtitle - scaled up roughly 40% */
+body.coding-mode .subtitle {
+    font-size: clamp(1rem, 4.2vw, 1.7rem);
+}
+
+/* Ensure headings & buttons inherit the coding font */
+body.coding-mode h1, 
+body.coding-mode h2, 
+body.coding-mode h3,
+body.coding-mode button {
+    font-family: inherit;
 }
