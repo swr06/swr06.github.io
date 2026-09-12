@@ -33,10 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         mainContainer.classList.remove('is-hidden');
-        body.classList.add('is-shaking'); setTimeout(() => body.classList.remove('is-shaking'), 500);
+        body.classList.add('is-shaking'); setTimeout(() => body.classList.remove('is-shaking'), 350);
         observeSectionTitles(); 
         observeProjectCards();
         initSlideshows();
+        initHoverPreviews();
     }
     
     if (startScreen) {
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Slideshow Logic ---
     function initSlideshows() {
-        const slideshowCards = document.querySelectorAll('.project-card');
+        const slideshowCards = document.querySelectorAll('.project-card:not(.hover-preview-card)');
         slideshowCards.forEach(card => {
             const container = card.querySelector('.image-container');
             if (!container) return;
@@ -108,6 +109,124 @@ document.addEventListener('DOMContentLoaded', () => {
             }, interval);
         });
     }
+
+    // --- Hover-only GIF previews ---
+    function initHoverPreviews() {
+        const isTouchOnly = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+        document.querySelectorAll('.hover-preview-card').forEach(card => {
+            const images = Array.from(card.querySelectorAll('.hover-preview img'));
+            const hint = card.querySelector('.preview-hint');
+            if (!images.length) return;
+
+            let currentIndex = 0;
+            let previewTimer = null;
+            const actionLabel = isTouchOnly ? 'TAP TO PLAY' : 'HOVER TO PLAY';
+
+            const showPreview = (index, animated) => {
+                images.forEach((image, imageIndex) => {
+                    image.classList.toggle('active', imageIndex === index);
+                    const source = animated && imageIndex === index ? image.dataset.animated : image.dataset.static;
+                    if (source && image.getAttribute('src') !== source) image.setAttribute('src', source);
+                });
+                if (hint) hint.textContent = images.length > 1 ? `${actionLabel} · ${index + 1}/${images.length}` : actionLabel;
+            };
+
+            const stopPreview = () => {
+                window.clearTimeout(previewTimer);
+                previewTimer = null;
+                currentIndex = 0;
+                showPreview(currentIndex, false);
+            };
+
+            const startPreview = () => {
+                showPreview(currentIndex, true);
+                if (images.length > 1) {
+                    const queueNextPreview = () => {
+                        const duration = parseInt(images[currentIndex].dataset.previewDuration, 10) || 5000;
+                        previewTimer = window.setTimeout(() => {
+                            currentIndex = (currentIndex + 1) % images.length;
+                            showPreview(currentIndex, true);
+                            queueNextPreview();
+                        }, duration);
+                    };
+                    queueNextPreview();
+                }
+            };
+
+            showPreview(0, false);
+
+            if (isTouchOnly) {
+                card.addEventListener('stop-touch-preview', () => {
+                    card.classList.remove('touch-preview-active');
+                    stopPreview();
+                });
+                card.addEventListener('click', event => {
+                    if (card.classList.contains('touch-preview-active')) return;
+                    event.preventDefault();
+                    document.querySelectorAll('.hover-preview-card.touch-preview-active').forEach(activeCard => {
+                        if (activeCard !== card) activeCard.dispatchEvent(new Event('stop-touch-preview'));
+                    });
+                    card.classList.add('touch-preview-active');
+                    startPreview();
+                });
+            } else {
+                card.addEventListener('mouseenter', startPreview);
+                card.addEventListener('mouseleave', stopPreview);
+            }
+        });
+
+        if (isTouchOnly) {
+            document.addEventListener('click', event => {
+                if (event.target.closest('.hover-preview-card')) return;
+                document.querySelectorAll('.hover-preview-card.touch-preview-active').forEach(card => {
+                    card.dispatchEvent(new Event('stop-touch-preview'));
+                });
+            });
+        }
+    }
+
+    // --- Music player modal ---
+    const musicModal = document.getElementById('music-modal');
+    const musicPlayer = document.getElementById('music-player');
+    const musicTitle = document.getElementById('music-modal-title');
+    const musicClose = musicModal && musicModal.querySelector('.music-modal-close');
+    let lastMusicTrigger = null;
+
+    function closeMusicPlayer() {
+        if (!musicModal || !musicPlayer) return;
+        musicPlayer.pause();
+        musicPlayer.removeAttribute('src');
+        musicPlayer.load();
+        musicModal.classList.remove('is-open');
+        musicModal.setAttribute('aria-hidden', 'true');
+        body.classList.remove('modal-open');
+        if (lastMusicTrigger) lastMusicTrigger.focus();
+    }
+
+    document.querySelectorAll('.music-card-button').forEach(button => {
+        button.addEventListener('click', () => {
+            if (!musicModal || !musicPlayer) return;
+            lastMusicTrigger = button;
+            musicTitle.textContent = button.dataset.track;
+            musicPlayer.src = button.dataset.video;
+            musicModal.classList.add('is-open');
+            musicModal.setAttribute('aria-hidden', 'false');
+            body.classList.add('modal-open');
+            musicClose.focus();
+            musicPlayer.play().catch(() => {});
+        });
+    });
+
+    if (musicClose) musicClose.addEventListener('click', closeMusicPlayer);
+    if (musicModal) {
+        musicModal.addEventListener('click', event => {
+            if (event.target === musicModal) closeMusicPlayer();
+        });
+    }
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && musicModal && musicModal.classList.contains('is-open')) closeMusicPlayer();
+    });
 
     // --- UI Interactions ---
     document.querySelectorAll('a, button, .project-card, .social-btn, .back-btn').forEach(elem => {
