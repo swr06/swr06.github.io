@@ -15,12 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Sound Logic ---
-    function playSound(audio) { 
-        if (audio && audio.readyState >= 2) { 
-            audio.currentTime = 0; 
-            audio.volume = 0.3; 
-            audio.play().catch(e => {}); 
-        } 
+    function playSound(audio) {
+        if (!audio) return;
+        audio.currentTime = 0;
+        audio.volume = 0.24;
+        audio.play().catch(() => {});
     }
 
     // --- Game/Site Start Logic ---
@@ -38,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         observeProjectCards();
         initSlideshows();
         initHoverPreviews();
+        initViewportVideos();
     }
     
     if (startScreen) {
@@ -186,6 +186,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Keep long blog pages light by playing embedded demos only near the viewport.
+    function initViewportVideos() {
+        const videos = document.querySelectorAll('.retro-media-box video');
+        if (!videos.length) return;
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                const video = entry.target;
+                if (entry.isIntersecting) video.play().catch(() => {});
+                else video.pause();
+            });
+        }, { threshold: 0.1, rootMargin: '160px 0px' });
+
+        videos.forEach(video => observer.observe(video));
+    }
+
     // --- Music player modal ---
     const musicModal = document.getElementById('music-modal');
     const musicPlayer = document.getElementById('music-player');
@@ -229,9 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- UI Interactions ---
-    document.querySelectorAll('a, button, .project-card, .social-btn, .back-btn').forEach(elem => {
-        elem.addEventListener('mouseenter', () => playSound(audioHover));
-        elem.addEventListener('click', () => playSound(audioClick));
+    document.querySelectorAll('a, button').forEach(elem => {
+        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            elem.addEventListener('mouseenter', () => playSound(audioHover));
+        }
+        elem.addEventListener('pointerdown', () => playSound(audioClick));
     });
 
     // --- RID EASTER EGG ---

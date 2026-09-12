@@ -74,7 +74,7 @@
                 <br>
                 
                 <div style="text-align: center; margin: 2rem 0; padding: 1rem; border: 2px dashed #444;">
-                    <img src="dfteq.png" alt="DFT Equation" style="max-width: 100%; height: auto; image-rendering: pixelated;">
+                    <img src="dfteq.png" alt="DFT Equation" loading="lazy" decoding="async" style="max-width: 100%; height: auto; image-rendering: pixelated;">
                 </div>
 
                 <p>e^-j(2&pi;kn/N) can be thought of as the complex "weight" or amplitude of the kth frequency. In this case, the kth frequency is one whose samples are spread over k rotations over the complex unit circle.</p>
@@ -152,7 +152,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <p>The core mechanic of the DFT is "wrapping" the signal around the origin. When the wrap rate matches a frequency in the signal, the points line up.</p>
 
                 <div class="retro-media-box">
-                    <video src="DFTWrapAroundScene.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                    <video src="DFTWrapAroundScene.mp4" loop muted playsinline preload="metadata" onloadeddata="this.playbackRate=1.1"></video>
                     <div class="retro-caption">Fig 1. Signal wrapping vs Center of Mass</div>
                 </div>
 
@@ -163,7 +163,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <p>Real-world audio doesn't care about our integer bins. A guitar string might vibrate at a frequency that lands at <span style="color: #ffcc00;">k = 5.4</span>.</p>
 
                 <div class="retro-media-box">
-                    <video src="SpectralLeakageScene.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                    <video src="SpectralLeakageScene.mp4" loop muted playsinline preload="metadata" onloadeddata="this.playbackRate=1.1"></video>
                     <div class="retro-caption">Fig 2. Discontinuity causing Energy Leakage</div>
                 </div>
 
@@ -180,7 +180,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <p>To solve this, we don't process the whole signal at once. Instead, we chop the signal into small, overlapping blocks (or "windows") and run the DFT on each block individually. This technique, the <strong>STFT</strong>, allows us to see how frequencies evolve over time.</p>
 
                 <div class="retro-media-box">
-                    <video src="STFT.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                    <video src="STFT.mp4" loop muted playsinline preload="metadata" onloadeddata="this.playbackRate=1.1"></video>
                     <div class="retro-caption">Fig 3. Sliding window analysis (STFT)</div>
                 </div>
                 
@@ -190,7 +190,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <p>When we slice audio into blocks for the STFT, the math inherently assumes that each small block repeats infinitely. However, because our cuts are arbitrary, the end of the block rarely lines up with the start.</p>
                 
                 <div class="retro-media-box">
-                    <video src="periodicityassumption.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                    <video src="periodicityassumption.mp4" loop muted playsinline preload="metadata" onloadeddata="this.playbackRate=1.1"></video>
                     <div class="retro-caption">Fig 4. The "Cliff" created by raw slicing</div>
                 </div>
 
@@ -201,7 +201,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <p>To fix the cliff, we cheat. We multiply the block by a "Window Function" like the <strong>Hann Filter</strong> before processing it. This shapes the audio into a smooth bell curve, tapering the jagged edges down to zero. We can then undo this transformation while taking the IDFT (inverse transform).</p>
 
                 <div class="retro-media-box">
-                    <video src="han.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                    <video src="han.mp4" loop muted playsinline preload="metadata" onloadeddata="this.playbackRate=1.1"></video>
                     <div class="retro-caption">Fig 5. Smoothing the edges with a Window</div>
                 </div>
 
@@ -219,7 +219,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <p>If we shrink our window to pinpoint the exact millisecond a drum hit, our frequency bins become wide and coarse (poor resolution). If we widen the window to distinguish between 440Hz and 441Hz, we smear the event out over time.</p>
 
                 <div class="retro-media-box">
-                    <video src="res.mp4" autoplay loop muted playsinline onloadeddata="this.playbackRate=1.1"></video>
+                    <video src="res.mp4" loop muted playsinline preload="metadata" onloadeddata="this.playbackRate=1.1"></video>
                     <div class="retro-caption">Fig 6. The Uncertainty Principle visualised</div>
                 </div>
 
@@ -235,7 +235,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <p>Adjusting the visual scales and mapping amplitude to color intensity allows us to "Look" at our audio from a new perspective. We can visually distinguish the transient snap of a snare drum from the steady harmonic layers of a synthesizer.</p>
 
                 <div class="retro-media-box">
-                    <img src="spectrum.png" alt="Audio Spectrum" style="image-rendering: pixelated;">
+                    <img src="spectrum.png" alt="Audio Spectrum" loading="lazy" decoding="async" style="image-rendering: pixelated;">
                     <div class="retro-caption">Fig 7. Visualizing the Frequency Domain</div>
                 </div>
 
@@ -247,7 +247,7 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <p>By painting onto the frequency canvas and running the Inverse DFT (IDFT), we convert the image back into sound waves. It is surprisingly effective; drawing a shape that "looks" like a chirp generally sounds like a chirp. We can essentially sculpt sound like clay.</p>
 
                 <div class="retro-media-box">
-                    <img src="drawingaudio.png" alt="Drawing Audio Tool" style="image-rendering: pixelated;">
+                    <img src="drawingaudio.png" alt="Drawing Audio Tool" loading="lazy" decoding="async" style="image-rendering: pixelated;">
                     <div class="retro-caption">Fig 8. Inverse FFT Painting</div>
                 </div>
 
@@ -256,8 +256,8 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
                 <h3>Conclusion</h3>
                 <p>It is genuinely amazing that we can effectively "paint" sound. By simply changing the "perspective" with which we look at audio, we can do so much more.</p>
 
-                <p>You can check out the full source code for this project here: <a href="https://github.com/swr06/AudioAnalyzer" target="_blank" style="color: #ffcc00;">AudioAnalyzer</a>.</p>
-				<p>And a video that demonstrates it : <a href="https://www.youtube.com/watch?v=XEH2yinbaYA" target="_blank" style="color: #ffcc00;">Youtube</a>.</p>
+                <p>You can check out the full source code for this project here: <a href="https://github.com/swr06/AudioAnalyzer" target="_blank" rel="noopener noreferrer" style="color: #ffcc00;">AudioAnalyzer</a>.</p>
+				<p>And a video that demonstrates it: <a href="https://www.youtube.com/watch?v=XEH2yinbaYA" target="_blank" rel="noopener noreferrer" style="color: #ffcc00;">YouTube</a>.</p>
 
             </div>
         </article>
@@ -266,8 +266,10 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
     <footer class="footer">
          <div class="section-title-wrapper"><h2 class="section-title" data-text="> Connect"></h2></div>
          <div class="social-links">
-            <a href="https://github.com/swr06/" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"><span>GitHub</span></a>
-            <a href="https://x.com/SamuelRasquinha" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt="Twitter/X"><span>Twitter</span></a>
+            <a href="https://github.com/swr06/" target="_blank" rel="noopener noreferrer" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt=""><span>GitHub</span></a>
+            <a href="https://x.com/SamuelRasquinha" target="_blank" rel="noopener noreferrer" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt=""><span>Twitter</span></a>
+            <a href="https://www.youtube.com/@samuelrasquinha6712" target="_blank" rel="noopener noreferrer" class="social-btn"><span class="social-symbol" aria-hidden="true">&#9654;</span><span>YouTube</span></a>
+            <a href="mailto:samuelrasquinha@gmail.com" class="social-btn"><span class="social-symbol" aria-hidden="true">@</span><span>samuelrasquinha@gmail.com</span></a>
         </div>
     </footer>
     </div>
@@ -284,8 +286,13 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
 
   const particles = [];
   const gravity = 0.2; 
+  const maxParticles = 140;
+  let lastTrailAt = 0;
 
   document.addEventListener('mousemove', function(e) {
+    const now = performance.now();
+    if (now - lastTrailAt < 28) return;
+    lastTrailAt = now;
     if (Math.random() > 0.4) createParticle(e.clientX, e.clientY, 'trail');
   });
 
@@ -294,6 +301,10 @@ std::vector<Complex> FullDFT(const std::vector<float>& Signal) {
   });
 
   function createParticle(x, y, type) {
+    if (particles.length >= maxParticles) {
+      const oldest = particles.shift();
+      if (oldest) oldest.element.remove();
+    }
     const particle = {
       element: document.createElement('div'),
       x: x,

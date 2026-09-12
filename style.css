@@ -394,6 +394,17 @@ body.modal-open { overflow: hidden; }
 }
 .social-btn:active { transform: translate(4px, 4px); box-shadow: none; }
 .social-btn img { width: 24px; height: 24px; filter: brightness(0) invert(1); transition: filter 0.1s; }
+.social-symbol {
+    display: inline-grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    color: var(--font-color);
+    font-size: 0.8rem;
+    line-height: 1;
+    transition: color 0.1s;
+}
+.social-btn:hover .social-symbol { color: var(--primary-color); }
 
 /* --- 8-Bit Particle Effect Styles --- */
 #particle-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
@@ -406,6 +417,8 @@ body.modal-open { overflow: hidden; }
 .code-block { background: #000; padding: 1rem; border: 2px dashed var(--border-color); margin: 1.5rem 0; overflow-x: auto; color: #0f0; }
 .code-block pre { font-family: 'Courier New', monospace; font-size: 0.9rem; margin: 0; }
 blockquote { border-left: 4px solid var(--accent-color); margin: 2rem 0; padding-left: 1rem; font-style: italic; color: #bbb; }
+.blog-content img,
+.blog-content video { max-width: 100%; }
 
 /* --- RID EASTER EGG POPUP --- */
 .rid-popup {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog :: Graphics Optimization</title>
+    <title>Blog :: Ray Box intersection</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
@@ -27,18 +27,18 @@
         </nav>
 
         <header class="header" style="margin-bottom: 3rem;">
-            <h1 class="name-title" data-text="Graphics Optimization">Graphics Optimization</h1>
+            <h1 class="name-title" data-text="Ray Box intersection">Ray Box intersection</h1>
             <p class="subtitle">~ Jan 25, 2026 ~</p>
         </header>
 
         <main>
             <article class="section">
                 <div class="section-title-wrapper">
-                    <h2 class="section-title" data-text="> Ray-Box Intersection"></h2>
+                    <h2 class="section-title" data-text="> Ray Box intersection"></h2>
                 </div>
                 
                 <div class="nes-container with-title is-dark blog-content">
-                    <p class="title">post_01.txt</p>
+                    <p class="title">RayBox.cpp</p>
                     
                     <p>Optimizing intersection algorithms is crucial for high-performance path tracing. In this post, I explore the slab method for AABB intersection.</p>
                     
@@ -71,8 +71,10 @@ __device__ bool intersect(const Ray& r, const AABB& box) {
         <footer class="footer">
              <div class="section-title-wrapper"><h2 class="section-title" data-text="> Connect"></h2></div>
              <div class="social-links">
-                <a href="https://github.com/swr06/" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"><span>GitHub</span></a>
-                <a href="https://x.com/SamuelRasquinha" target="_blank" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt="Twitter/X"><span>Twitter</span></a>
+                <a href="https://github.com/swr06/" target="_blank" rel="noopener noreferrer" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt=""><span>GitHub</span></a>
+                <a href="https://x.com/SamuelRasquinha" target="_blank" rel="noopener noreferrer" class="social-btn"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt=""><span>Twitter</span></a>
+                <a href="https://www.youtube.com/@samuelrasquinha6712" target="_blank" rel="noopener noreferrer" class="social-btn"><span class="social-symbol" aria-hidden="true">&#9654;</span><span>YouTube</span></a>
+                <a href="mailto:samuelrasquinha@gmail.com" class="social-btn"><span class="social-symbol" aria-hidden="true">@</span><span>samuelrasquinha@gmail.com</span></a>
             </div>
         </footer>
     </div>
@@ -88,9 +90,20 @@ __device__ bool intersect(const Ray& r, const AABB& box) {
 	  if (!canvas) return;
 	  const particles = [];
 	  const gravity = 0.2; 
-	  document.addEventListener('mousemove', function(e) { if (Math.random() > 0.4) createParticle(e.clientX, e.clientY, 'trail'); });
+	  const maxParticles = 140;
+	  let lastTrailAt = 0;
+	  document.addEventListener('mousemove', function(e) {
+		const now = performance.now();
+		if (now - lastTrailAt < 28) return;
+		lastTrailAt = now;
+		if (Math.random() > 0.4) createParticle(e.clientX, e.clientY, 'trail');
+	  });
 	  document.addEventListener('click', function(e) { for (let i = 0; i < 20; i++) createParticle(e.clientX, e.clientY, 'burst'); });
 	  function createParticle(x, y, type) {
+		if (particles.length >= maxParticles) {
+		  const oldest = particles.shift();
+		  if (oldest) oldest.element.remove();
+		}
 		const particle = { element: document.createElement('div'), x: x, y: y, vx: 0, vy: 0, size: 0, life: 0, initialLife: 0, bounces: 2 };
 		if (type === 'trail') {
 		  const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 0.5;
