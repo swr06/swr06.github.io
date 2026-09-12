@@ -373,6 +373,8 @@ body.modal-open { overflow: hidden; }
 .social-btn, .back-btn { 
     display: inline-flex; 
     align-items: center; 
+    min-width: 0;
+    max-width: 100%;
     gap: 12px; 
     padding: 10px 20px; 
     background: #333; 
@@ -394,6 +396,17 @@ body.modal-open { overflow: hidden; }
 }
 .social-btn:active { transform: translate(4px, 4px); box-shadow: none; }
 .social-btn img { width: 24px; height: 24px; filter: brightness(0) invert(1); transition: filter 0.1s; }
+.social-btn > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.social-icon {
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+}
 .social-symbol {
     display: inline-grid;
     width: 24px;
@@ -586,7 +599,9 @@ blockquote { border-left: 4px solid var(--accent-color); margin: 2rem 0; padding
     .project-card { border-width: 3px; margin-bottom: 0.5rem; }
     .card-text h3 { font-size: 1rem; }
     .card-text p { font-size: 0.76rem; line-height: 1.7; }
-    .social-btn { padding: 10px 12px; }
+    .social-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+    .social-btn { width: 100%; gap: 8px; padding: 10px 8px; font-size: 0.58rem; }
+    .social-links .social-btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .music-modal-header h2 { font-size: 0.82rem; }
     .music-modal-panel { border-width: 3px; }
 }
