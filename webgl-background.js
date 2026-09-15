@@ -62,8 +62,14 @@ if (!gl) {
     const posAttrLoc = gl.getAttribLocation(program, "a_position"), resUniLoc=gl.getUniformLocation(program, "u_resolution"), timeUniLoc=gl.getUniformLocation(program, "u_time");
     const posBuffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
 
-    function render(time) {
-        time *= 0.003; 
+    const frameInterval = window.matchMedia('(hover: none) and (pointer: coarse)').matches ? 50 : 33;
+    let lastFrameTime = 0;
+
+    function render(timestamp) {
+        requestAnimationFrame(render);
+        if (document.hidden || timestamp - lastFrameTime < frameInterval) return;
+        lastFrameTime = timestamp;
+        const time = timestamp * 0.003;
         
         // Handle High DPI displays and Mobile resizing
         const displayWidth  = gl.canvas.clientWidth;
@@ -80,8 +86,7 @@ if (!gl) {
         gl.enableVertexAttribArray(posAttrLoc); gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer); gl.vertexAttribPointer(posAttrLoc,2,gl.FLOAT,false,0,0);
         gl.uniform2f(resUniLoc, gl.canvas.width, gl.canvas.height); 
         gl.uniform1f(timeUniLoc, time); 
-        gl.drawArrays(gl.TRIANGLES,0,6); 
-        requestAnimationFrame(render);
+        gl.drawArrays(gl.TRIANGLES,0,6);
     }
     requestAnimationFrame(render);
 }
