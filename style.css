@@ -154,6 +154,37 @@ a:hover { color: var(--primary-color); }
 .section-title { font-size: clamp(1rem, 4vw, 2rem); color: var(--primary-color); display: flex; word-break: break-word; }
 .section-title .caret { animation: blink 0.7s infinite; }
 
+.software-title-row { display: flex; align-items: center; gap: clamp(0.65rem, 2vw, 1rem); min-width: 0; }
+.software-title-row .section-title { min-width: 0; }
+.pre-ai-badge {
+    position: relative;
+    flex: 0 0 auto;
+    padding: 0.45rem 0.55rem 0.38rem;
+    border: 2px solid var(--secondary-color);
+    background: #190019;
+    color: #fff;
+    box-shadow: 3px 3px 0 #000, 5px 5px 0 rgba(255, 0, 255, 0.22);
+    font-size: clamp(0.55rem, 1.4vw, 0.72rem);
+    line-height: 1;
+    white-space: nowrap;
+    transform: translateY(-2px) rotate(-2deg);
+    opacity: 0;
+    transition: opacity 0.25s ease 0.55s, transform 0.25s ease 0.55s;
+}
+.pre-ai-badge::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    bottom: -5px;
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid var(--secondary-color);
+    border-bottom: 2px solid var(--secondary-color);
+    background: #190019;
+    transform: rotate(45deg);
+}
+.software-title-wrapper.is-visible .pre-ai-badge { opacity: 1; transform: translateY(-2px) rotate(-2deg) scale(1); }
+
 /* 8-bit Style container box */
 .nes-container { border: 4px solid var(--border-color); padding: 1.5rem; background-color: rgba(10, 10, 10, 0.7); box-sizing: border-box; }
 .nes-container.with-title { position: relative; margin-top: 1.5rem; }
@@ -611,6 +642,9 @@ blockquote { border-left: 4px solid var(--accent-color); margin: 2rem 0; padding
     .subtitle { font-size: clamp(0.5rem, 2.7vw, 0.62rem); letter-spacing: -0.2px; }
     .section { margin-bottom: 3.5rem; }
     .section-title { font-size: 1rem; line-height: 1.5; }
+    .software-title-row { gap: 0.55rem; }
+    .software-title-row .section-title { font-size: clamp(0.78rem, 3.8vw, 0.95rem); white-space: nowrap; }
+    .pre-ai-badge { padding: 0.38rem 0.4rem 0.32rem; font-size: clamp(0.43rem, 2.2vw, 0.55rem); }
     .nes-container { border-width: 3px; padding: 0.9rem 0.75rem; }
     .nes-container.with-title > .title { top: -16px; left: 10px; font-size: 0.78rem; }
     .project-grid { gap: 1rem; }
