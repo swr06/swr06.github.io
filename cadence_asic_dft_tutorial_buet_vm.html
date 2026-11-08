@@ -720,11 +720,11 @@ which irun rc encounter virtuoso assura</code></pre>
 irun -gui rtl/cnt_updown.v tb/tb_cnt_updown.v &amp;
 simvision &amp;
 
-# Logic synthesis (GUI) — batch runs are shown in Chapter 2
-rc -gui &amp;
+# Logic synthesis (GUI) — NO "&amp;": RC needs the terminal for its rc:/&gt; prompt
+rc -gui
 
-# Floorplan, placement, clock tree and routing
-encounter &amp;
+# Floorplan, placement, clock tree and routing (no "&amp;" - its prompt is in the terminal)
+encounter
 
 # Custom-layout / GDS viewing (run it from the virtuoso/ folder - Step 7.6)
 virtuoso &amp;
@@ -2162,7 +2162,8 @@ simvision updown_counter.dump &amp;</code></pre></div><div><b class="rc-sub">Wha
 cd /home/buet/cds_work/asic_lab
 source setup_cadence.sh
 which rc
-rc -gui &amp;</code></pre>
+rc -gui</code></pre>
+          <p class="aside-text"><b>No <code>&amp;</code> here.</b> RTL Compiler reads its commands from the terminal (<code>rc:/&gt;</code>); the window is an extra view. Started in the background with <code>&amp;</code>, the shell suspends it as soon as it wants the terminal, and no window ever appears (<code>jobs</code> then shows <code>Stopped</code> — type <code>fg</code> to resume it). The window can take 20–40&nbsp;s to open the first time. Use a second terminal if you need a shell while RC runs.</p>
           <p>Try two commands at the <code>rc:/&gt;</code> prompt to get a feel for the tool. RC stores everything (libraries, designs, settings) in a virtual directory tree you can browse like a file system:</p>
 <pre><span class="code-title">rc:/&gt; prompt · Tcl</span><button class="copy">Copy</button><code data-lang="tcl">ls /
 help synthesize</code></pre>
@@ -2257,7 +2258,7 @@ puts "==== RC synthesis of $TOP finished. Type 'exit' to quit. ===="</code></pre
 rc -files scripts/rtl_rc.tcl -logfile logs/rc_synth.log
 # RC stops at the rc:/&gt; prompt when the script ends. Inspect, then:
 #   exit</code></pre>
-          <p>To run the same script and look at the result graphically, start <code>rc -gui -files scripts/rtl_rc.tcl -logfile logs/rc_synth_gui.log &amp;</code>. In the GUI, the <b>HDL Viewer</b>/<b>Schematic</b> tabs show the mapped gates.</p>
+          <p>To run the same script and look at the result graphically, start <code>rc -gui -files scripts/rtl_rc.tcl -logfile logs/rc_synth_gui.log</code> (again without <code>&amp;</code>). In the GUI, the <b>HDL Viewer</b>/<b>Schematic</b> tabs show the mapped gates.</p>
           <div class="expect"><b>What you should see</b><ul><li>The log ends with <code>==== RC synthesis of cnt_updown finished ====</code> and no <code>Error</code> lines.</li><li><code>results/cnt_updown_mapped.v</code> contains cell instances such as <code>DFFRHQX1</code>, <code>ADDHX1</code>, <code>XOR2XL</code>, <code>MXI2XL</code> (exact names depend on optimization).</li><li><code>reports/gates.rpt</code> lists roughly 25–45 cells including 8 sequential cells.</li></ul></div>
           <details class="trouble"><summary>Troubleshooting — RC errors</summary><div class="tb">
             <p><b><code>Error : Could not find library file</code></b> — <code>$LIB_SLOW</code> in <code>scripts/lib_paths.tcl</code> is wrong. Run <code>ls</code> on the path; fix it.</p>
@@ -2726,7 +2727,8 @@ cd /home/buet/cds_work/asic_lab
 source setup_cadence.sh
 ls results/cnt_updown_mapped.v results/cnt_updown_mapped.sdc
 which encounter
-encounter -log logs/encounter_gui.log &amp;</code></pre>
+encounter -log logs/encounter_gui.log</code></pre>
+          <p class="aside-text"><b>No <code>&amp;</code>.</b> Like RTL Compiler, Encounter reads Tcl from the terminal prompt <code>encounter 1&gt;</code>; started in the background it is suspended and the window never appears (<code>fg</code> resumes it). Keep this terminal for Encounter and open a second one for other commands.</p>
           <p>Two things appear: the Encounter main window (a black layout canvas with menus <b>File, Edit, View, Partition, Floorplan, Power, Place, Optimize, Clock, Route, Timing, Verify, Tools</b>) and, in the terminal, the <code>encounter 1&gt;</code> Tcl prompt. Every GUI action is echoed as its Tcl command in the terminal and in <code>encounter.cmd</code> — a free way to learn the commands used in Chapter 5.</p>
           <div class="understand"><b>Why launch from the project directory</b><p>Relative paths in Tcl, saved design databases and reports resolve from the directory that started Encounter. Starting elsewhere is a common reason a correct script suddenly cannot find its LEF, Liberty or SDC files.</p></div>
           <div class="expect"><b>What you should see</b><ul><li>The Encounter window opens with a black canvas, a menu bar and a layer panel on the right.</li><li>The terminal shows the banner <code>Encounter v13.10-p003_1 (32bit)</code> and the prompt <code>encounter 1&gt;</code>; every GUI action you take from now on is echoed there.</li></ul></div><h4><span class="n">B</span>Encounter GUI survival kit</h4>
@@ -3068,7 +3070,7 @@ End Summary
   VERIFY GEOMETRY ...... Sub-Area : 1 complete 0 viols. 0 wrngs.
 Verification Complete : 0 Viols. 0 Wrngs.                           [5]
 Writing Encounter database to results/cnt_updown_postRoute.enc.dat</code></pre><ol class="annot-list"><li><b>Filler count</b> — any non-zero number is fine; it depends on how many row gaps placement left. Zero means the filler cell names in <code>$FILLERS</code> are wrong.</li><li><b>Database units</b> must say 2000 — the same value you will pass to <code>streamOut -units</code> in Step 7.5.</li><li><b>Connectivity</b>: “no problems” means every net, including VDD/VSS rails to every cell, is one connected piece.</li><li><b>Geometry</b> sub-checks: <i>Cells</i> = overlapping instances, <i>SameNet</i> = notches/spacing on one net, <i>Wiring</i> = spacing/width between different nets, <i>Antenna</i> = process-antenna ratios.</li><li>Both totals 0 → proceed. Any violation: open <b>Tools → Violation Browser</b>, click the entry and the layout zooms to it.</li></ol></div><div class="checkpoint"><b>Checkpoint</b><span>Fillers inserted, 0 connectivity and geometry violations, and <code>results/cnt_updown_postRoute.enc(.dat)</code> plus <code>results/cnt_updown_postRoute.v</code> exist.</span></div></div></article>
-      <div class="recap"><div class="rc-h">✔ Chapter recap</div><div class="rc-grid"><div><b class="rc-sub">Commands in order</b><pre><span class="code-title">Chapter commands, in order (condensed — every option is in the steps)</span><button class="copy">Copy</button><code data-lang="shell">encounter -log logs/encounter_gui.log &amp;
+      <div class="recap"><div class="rc-h">✔ Chapter recap</div><div class="rc-grid"><div><b class="rc-sub">Commands in order</b><pre><span class="code-title">Chapter commands, in order (condensed — every option is in the steps)</span><button class="copy">Copy</button><code data-lang="shell">encounter -log logs/encounter_gui.log
 # GUI: Import Design (netlist, LEF, scripts/mmmc.tcl, VDD/VSS) -&gt; save default.conf
 floorPlan -site CoreSite -r 1.0 0.72 100 100 100 100
 globalNetConnect VDD -type pgpin -pin VDD -inst *;  globalNetConnect VSS -type pgpin -pin VSS -inst *
