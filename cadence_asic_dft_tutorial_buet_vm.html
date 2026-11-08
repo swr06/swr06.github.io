@@ -1896,8 +1896,8 @@ cat cds.lib hdl.var</code></pre>
 <pre><span class="code-title">ncvlog → ncelab → ncsim · shell</span><button class="copy">Copy</button><code data-lang="shell">ncvlog -messages -linedebug rtl/cnt_updown.v tb/tb_cnt_updown.v
 ncelab -messages -access +rwc worklib.tb_cnt_updown
 ncsim  -messages worklib.tb_cnt_updown</code></pre>
-          <p>Watch the last line printed by <code>ncelab</code>: <code>Writing initial simulation snapshot: worklib.tb_cnt_updown:…</code>. Whatever follows the colon is the snapshot's <em>view</em> name. The historical course snapshot is named <code>worklib.tb_cnt_updown:v</code>; on your run it may be <code>:module</code>. Use exactly what your tool printed whenever this page writes the snapshot name.</p>
-<pre><span class="code-title">Saved snapshot (course form) · shell</span><button class="copy">Copy</button><code data-lang="shell">ncsim -messages worklib.tb_cnt_updown:v</code></pre>
+          <p>Watch the last line printed by <code>ncelab</code>: <code>Writing initial simulation snapshot: worklib.tb_cnt_updown:…</code>. Whatever follows the colon is the snapshot's <em>view</em> name. The historical course snapshot is named <code>worklib.tb_cnt_updown:v</code>; on your VM <code>ncelab</code> prints <code>worklib.tb_cnt_updown:module</code>, so that is the name used below and in Step 3.2. Leaving the suffix off (<code>worklib.tb_cnt_updown</code>) also works.</p>
+<pre><span class="code-title">Saved snapshot (your VM) · shell</span><button class="copy">Copy</button><code data-lang="shell">ncsim -messages worklib.tb_cnt_updown:module</code></pre>
           <div class="step-media" data-figure="cf4"></div>
           <p>The screenshot shows <code>ncsim</code> loading the snapshot and running to <code>$finish</code> without any compile step — exactly what you should see.</p>
           <details class="trouble"><summary>Troubleshooting — snapshot not found</summary><div class="tb"><p><b><code>*E,SNAPNF</code> / "snapshot not found"</b> — the name after the colon is wrong, or <code>ncsim</code> is running in a different directory than <code>ncelab</code>. Run <code>ls worklib</code> or <code>ncls -snapshot</code> to list the snapshots that exist.</p><p><b><code>*F,CDSLIB</code></b> — <code>cds.lib</code> is missing from the current directory. Repeat part A.</p></div></details>
@@ -2480,8 +2480,9 @@ gedit dumptcf.tcl &amp;</code></pre>
           <p class="aside-text"><b>Why stop at 345 ns?</b> <code>$finish</code> runs at 350&nbsp;ns and ends the simulator; commands after it in the script would never run, and the TCF would not be closed (a <code>run 370 ns</code> would hit <code>$finish</code> first). Stopping 5&nbsp;ns earlier captures the whole workload — the last counting edge is at 335&nbsp;ns.</p>
 
           <h4><span class="n">B</span>Open NCSim in GUI mode on the snapshot from Step 1.5</h4>
-<pre><span class="code-title">NCSim · shell</span><button class="copy">Copy</button><code data-lang="shell">ncsim -gui worklib.tb_cnt_updown:v
-# use the snapshot name ncelab printed (e.g. :module) if :v is not found</code></pre>
+<pre><span class="code-title">NCSim · shell</span><button class="copy">Copy</button><code data-lang="shell">ncsim -gui worklib.tb_cnt_updown:module
+# :module is the view name your ncelab printed in Step 1.5 (the course used :v)
+# "*F,NOSNAP" means Step 1.5 was not run in this folder: rerun its ncvlog + ncelab lines</code></pre>
           <p>SimVision opens attached to a live simulation, stopped at time 0. The <b>Console</b> window at the bottom has an <code>ncsim&gt;</code> prompt where Tcl commands are typed.</p>
           <div class="step-media" data-figure="pw2"></div>
 
