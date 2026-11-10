@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startGame();
     }
 
-    initParticles();
+    const burstParticles = initParticles();
     initFontSwitcher();
 
     // --- Typing Animation ---
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initParticles() {
         const layer = document.getElementById('particle-canvas');
-        if (!layer || !finePointer || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (!layer || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
         const particles = [];
         const maxParticles = 80;
@@ -381,18 +381,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (particles.length && !document.hidden) animationFrame = requestAnimationFrame(update);
         }
 
-        document.addEventListener('mousemove', event => {
-            const now = performance.now();
-            if (now - lastTrailAt < 38) return;
-            lastTrailAt = now;
-            if (Math.random() > 0.55) createParticle(event.clientX, event.clientY, 'trail');
-        }, { passive: true });
-        document.addEventListener('click', event => {
-            for (let i = 0; i < 10; i++) createParticle(event.clientX, event.clientY, 'burst');
-        });
+        function burst(x, y, count) {
+            for (let i = 0; i < count; i++) createParticle(x, y, 'burst');
+        }
+
+        if (finePointer) {
+            document.addEventListener('mousemove', event => {
+                const now = performance.now();
+                if (now - lastTrailAt < 38) return;
+                lastTrailAt = now;
+                if (Math.random() > 0.55) createParticle(event.clientX, event.clientY, 'trail');
+            }, { passive: true });
+            document.addEventListener('click', event => burst(event.clientX, event.clientY, 10));
+        }
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) runAnimation();
         });
+        return burst;
     }
 
     function initFontSwitcher() {
@@ -453,6 +458,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         elem.addEventListener('pointerdown', () => playSound('click'));
     });
+
+    const trackerReveal = document.getElementById('tracker-reveal');
+    const tutorialsSection = document.getElementById('in-progress-tutorials');
+    if (trackerReveal && tutorialsSection) {
+        let presses = 0;
+        trackerReveal.addEventListener('click', () => {
+            presses += 1;
+            if (presses !== 3) return;
+
+            presses = 0;
+            tutorialsSection.hidden = !tutorialsSection.hidden;
+            const expanded = !tutorialsSection.hidden;
+            trackerReveal.setAttribute('aria-expanded', String(expanded));
+            trackerReveal.setAttribute('aria-label', expanded
+                ? 'Hide Learning Resources - ECE after three presses'
+                : 'Reveal Learning Resources - ECE after three presses');
+
+            if (!expanded) return;
+            const { left, top, width, height } = trackerReveal.getBoundingClientRect();
+            burstParticles?.(left + width / 2, top + height / 2, finePointer ? 40 : 28);
+        });
+    }
 
     // --- RID EASTER EGG ---
     let keyBuffer = "";

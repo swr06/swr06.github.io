@@ -148,6 +148,38 @@ a:hover { color: var(--primary-color); }
 .subtitle { max-width: 100%; font-size: clamp(0.7rem, 3vw, 1.2rem); color: var(--primary-color); margin: 0.5rem auto 0; text-shadow: 2px 2px #000; line-height: 1.5; white-space: nowrap; }
 .section { margin-bottom: 6rem; }
 
+.tracker-reveal {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-top: 0.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--font-color);
+    touch-action: manipulation;
+}
+
+.tracker-reveal::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+}
+
+.tracker-reveal:hover,
+.tracker-reveal:focus-visible,
+.tracker-reveal[aria-expanded="true"] {
+    color: var(--primary-color);
+}
+
+.tracker-reveal[aria-expanded="true"]::before {
+    background: currentColor;
+}
+
+#in-progress-tutorials[hidden] { display: none; }
+
 .section-title-wrapper { position: relative; margin-bottom: 2.5rem; padding-bottom: 10px; }
 .section-title-wrapper::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: var(--primary-color); transform: scaleX(0); transform-origin: left; transition: transform 0.5s ease-out 0.3s; }
 .section-title-wrapper.is-visible::after { transform: scaleX(1); }
