@@ -465,14 +465,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const accessInput = accessForm?.querySelector('input');
     if (trackerReveal && tutorialsSection && accessInput) {
         let presses = 0;
-        const showTutorials = () => {
-            if (accessInput.value !== 'peakasf') return;
+        const dismissAccess = () => {
+            presses = 0;
             accessInput.value = '';
             accessForm.hidden = true;
+            trackerReveal.focus({ preventScroll: true });
+        };
+        const showTutorials = () => {
+            if (accessInput.value !== 'peakasf') return;
+            dismissAccess();
             tutorialsSection.hidden = false;
             trackerReveal.setAttribute('aria-expanded', 'true');
             trackerReveal.setAttribute('aria-label', 'Hide Learning Resources - ECE after three presses');
-            trackerReveal.focus();
             const { left, top, width, height } = trackerReveal.getBoundingClientRect();
             burstParticles?.(left + width / 2, top + height / 2, finePointer ? 40 : 28);
         };
@@ -483,9 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         accessInput.addEventListener('keydown', event => {
             if (event.key !== 'Escape') return;
-            accessInput.value = '';
-            accessForm.hidden = true;
-            trackerReveal.focus();
+            dismissAccess();
         });
 
         trackerReveal.addEventListener('click', () => {
@@ -493,6 +495,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (presses !== 3) return;
 
             presses = 0;
+            if (!accessForm.hidden) {
+                dismissAccess();
+                return;
+            }
             if (tutorialsSection.hidden) {
                 accessForm.hidden = false;
                 accessInput.focus();

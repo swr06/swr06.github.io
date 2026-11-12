@@ -148,12 +148,19 @@ a:hover { color: var(--primary-color); }
 .subtitle { max-width: 100%; font-size: clamp(0.7rem, 3vw, 1.2rem); color: var(--primary-color); margin: 0.5rem auto 0; text-shadow: 2px 2px #000; line-height: 1.5; white-space: nowrap; }
 .section { margin-bottom: 6rem; }
 
+.tracker-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
 .tracker-reveal {
     display: inline-grid;
     place-items: center;
+    flex: 0 0 auto;
     width: 44px;
     height: 44px;
-    margin-top: 0.5rem;
     padding: 0;
     border: 0;
     background: transparent;
@@ -178,10 +185,23 @@ a:hover { color: var(--primary-color); }
     background: currentColor;
 }
 
+.tracker-reveal:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
+}
+
 #in-progress-tutorials[hidden] { display: none; }
 
+.tracker-access {
+    width: 15rem;
+    min-width: 0;
+    margin: 0;
+}
+
 .tracker-access input {
-    width: min(100%, 15rem);
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
     min-height: 44px;
     padding: 0.5rem;
     border: 2px solid var(--primary-color);
