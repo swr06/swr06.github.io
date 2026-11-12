@@ -461,23 +461,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const trackerReveal = document.getElementById('tracker-reveal');
     const tutorialsSection = document.getElementById('in-progress-tutorials');
-    if (trackerReveal && tutorialsSection) {
+    const accessForm = document.getElementById('tracker-access');
+    const accessInput = accessForm?.querySelector('input');
+    if (trackerReveal && tutorialsSection && accessInput) {
         let presses = 0;
+        const showTutorials = () => {
+            if (accessInput.value !== 'peakasf') return;
+            accessInput.value = '';
+            accessForm.hidden = true;
+            tutorialsSection.hidden = false;
+            trackerReveal.setAttribute('aria-expanded', 'true');
+            trackerReveal.setAttribute('aria-label', 'Hide Learning Resources - ECE after three presses');
+            trackerReveal.focus();
+            const { left, top, width, height } = trackerReveal.getBoundingClientRect();
+            burstParticles?.(left + width / 2, top + height / 2, finePointer ? 40 : 28);
+        };
+        accessInput.addEventListener('input', showTutorials);
+        accessForm.addEventListener('submit', event => {
+            event.preventDefault();
+            showTutorials();
+        });
+        accessInput.addEventListener('keydown', event => {
+            if (event.key !== 'Escape') return;
+            accessInput.value = '';
+            accessForm.hidden = true;
+            trackerReveal.focus();
+        });
+
         trackerReveal.addEventListener('click', () => {
             presses += 1;
             if (presses !== 3) return;
 
             presses = 0;
-            tutorialsSection.hidden = !tutorialsSection.hidden;
-            const expanded = !tutorialsSection.hidden;
-            trackerReveal.setAttribute('aria-expanded', String(expanded));
-            trackerReveal.setAttribute('aria-label', expanded
-                ? 'Hide Learning Resources - ECE after three presses'
-                : 'Reveal Learning Resources - ECE after three presses');
-
-            if (!expanded) return;
-            const { left, top, width, height } = trackerReveal.getBoundingClientRect();
-            burstParticles?.(left + width / 2, top + height / 2, finePointer ? 40 : 28);
+            if (tutorialsSection.hidden) {
+                accessForm.hidden = false;
+                accessInput.focus();
+                return;
+            }
+            tutorialsSection.hidden = true;
+            trackerReveal.setAttribute('aria-expanded', 'false');
+            trackerReveal.setAttribute('aria-label', 'Reveal Learning Resources - ECE after three presses');
         });
     }
 
